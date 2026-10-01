@@ -12,7 +12,7 @@ Stage 1 (business workflow, roles and database) is drafted. Apps come next, in t
 |---|---|
 | [docs/stage1-spec.md](docs/stage1-spec.md) | Request lifecycle, role permissions, payments, commissions and settlements |
 | [supabase/migrations/](supabase/migrations/) | Database schema, rules and security policies |
-| [supabase/tests/](supabase/tests/) | Rule tests run against a local PostgreSQL with a Supabase stand-in |
+| [tests/db/](tests/db/) | Rule tests run against a local PostgreSQL with a Supabase stand-in |
 | [scripts/test-db.sh](scripts/test-db.sh) | Runs those tests |
 
 ## Database
