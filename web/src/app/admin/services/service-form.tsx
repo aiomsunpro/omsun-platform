@@ -22,7 +22,7 @@ export function ServiceFields({
             ))}
           </select>
         </Field>
-        <Field label="Code * (e.g. PAN-NEW)">
+        <Field label="Code * (Like PAN-NEW)">
           <input name="code" required defaultValue={service?.code} className={inputClass} />
         </Field>
         <Field label="Processing days">

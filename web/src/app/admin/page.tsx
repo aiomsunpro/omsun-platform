@@ -217,7 +217,7 @@ export default async function Dashboard() {
           <CircleCheck size={20} className="text-green-600" /> <b>All caught up!</b> No requests are past their expected time.
         </div>
       ) : (
-        <a href="#action-required" className="mt-5 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-5 py-3 text-red-900">
+        <a href="#action-required" className="mt-5 flex normal-case items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-5 py-3 text-red-900">
           <TriangleAlert size={20} className="text-red-600" /> <b>{overdue.length} request{overdue.length > 1 ? "s are" : " is"} past the expected time.</b> See below.
         </a>
       )}

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -131,10 +132,12 @@ export function AdminShell({
       {/* Top bar */}
       <header className="sticky top-0 z-30 flex h-16 items-center gap-3 bg-gradient-to-r from-blue-950 via-blue-800 to-blue-600 px-3 text-white shadow md:px-4">
         <Link href="/admin" className="flex w-auto items-center gap-2 md:w-60">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-yellow-400 text-sm font-black text-blue-950">OM</span>
-          <span className="hidden text-lg font-bold sm:inline">
-            OMSUN <span className="text-yellow-300">Admin</span>
+          {/* Full logo from tablet width up; the emblem alone on phones so the logo is never squeezed. */}
+          <span className="shrink-0 rounded-md bg-white p-1 sm:px-2">
+            <Image src="/omsun-emblem.png" alt="OMSUN E-Seva Kendra" width={256} height={256} priority className="h-8 w-8 sm:hidden" />
+            <Image src="/omsun-logo.png" alt="OMSUN E-Seva Kendra" width={822} height={323} priority className="hidden h-10 w-auto max-w-none sm:block" />
           </span>
+          <span className="hidden text-lg font-bold text-yellow-300 sm:inline">Admin</span>
         </Link>
         <button
           aria-label="Toggle menu"

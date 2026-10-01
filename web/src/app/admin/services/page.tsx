@@ -4,7 +4,7 @@ import { rupees } from "@/lib/format";
 import type { Service, ServiceCategory } from "@/lib/types";
 import { ActionForm } from "@/components/action-form";
 import { Card, Empty, Field, inputClass, PageTitle, Table } from "@/components/ui";
-import { addCategory, addService } from "./actions";
+import { addCategory, addService, addServicesBulk } from "./actions";
 import { ServiceFields } from "./service-form";
 
 export default async function ServicesPage() {
@@ -18,7 +18,7 @@ export default async function ServicesPage() {
 
   return (
     <>
-      <PageTitle title="Service catalogue" />
+      <PageTitle title="Service Management" />
       <p className="mb-4 text-sm text-gray-600">
         This list feeds the OMSUN Mitra app and the website. Price changes apply to new requests only.
       </p>
@@ -62,6 +62,26 @@ export default async function ServicesPage() {
                 ) : (
                   <p className="text-sm text-gray-600">Add a category first.</p>
                 )}
+              </Card>
+            </div>
+          )}
+          {profile.role === "owner" && (
+            <div className="lg:col-span-3">
+              <Card title="Add many services at once">
+                <ActionForm action={addServicesBulk} submitLabel="Add these services">
+                  <p className="text-sm text-gray-600">
+                    Paste one service per line, or copy the rows straight from Excel. Columns in this order: Category, Name
+                    (English), Name (Marathi), Govt fee, Service charge, Commission, Days. New categories are created for you,
+                    and if any line has a problem nothing is added.
+                  </p>
+                  <textarea
+                    name="list"
+                    rows={6}
+                    required
+                    className={`${inputClass} font-mono`}
+                    placeholder={"Identity documents, New PAN card, नवीन पॅन कार्ड, 107, 93, 40, 7\nCertificates, Income certificate, उत्पन्न दाखला, 34, 66, 25, 15"}
+                  />
+                </ActionForm>
               </Card>
             </div>
           )}

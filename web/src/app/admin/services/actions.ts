@@ -80,3 +80,78 @@ export async function removeRequiredDocument(_: ActionState, f: FormData): Promi
   revalidatePath(`/admin/services/${id}`);
   return { ok: "Removed." };
 }
+
+// Paste many services at once, one per line, comma or tab separated (a copy
+// from Excel works): Category, Name (English), Name (Marathi), Govt fee,
+// Service charge, Commission, Days. New categories are created on the way.
+export async function addServicesBulk(_: ActionState, f: FormData): Promise<ActionState> {
+  const { supabase } = await requireStaff(["owner"]);
+  const lines = s(f, "list").split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  if (lines.length === 0) return { error: "Paste at least one service." };
+  if (lines.length > 300) return { error: "Paste at most 300 services at a time." };
+
+  const [{ data: cats, error: e1 }, { data: existing, error: e2 }] = await Promise.all([
+    supabase.from("service_categories").select("id, name_en"),
+    supabase.from("services").select("code, name_en"),
+  ]);
+  if (e1 || e2) return { error: (e1 ?? e2)!.message };
+  const catId = new Map((cats ?? []).map((c) => [c.name_en.toLowerCase(), c.id as string]));
+  const codes = new Set((existing ?? []).map((x) => x.code as string));
+  const names = new Set((existing ?? []).map((x) => (x.name_en as string).toLowerCase()));
+
+  const rows: { category: string; name_en: string; name_mr: string; govt_fee: number; service_charge: number; retailer_commission: number; processing_days: number | null }[] = [];
+  const problems: string[] = [];
+  const money = (v: string | undefined) => Number((v ?? "").replace(/[₹,\s]/g, "") || 0);
+  lines.forEach((line, i) => {
+    const c = line.split(line.includes("\t") ? "\t" : ",").map((x) => x.trim());
+    const [category, name_en, name_mr] = c;
+    const row = {
+      category,
+      name_en,
+      name_mr: name_mr || name_en,
+      govt_fee: money(c[3]),
+      service_charge: money(c[4]),
+      retailer_commission: money(c[5]),
+      processing_days: c[6] ? Number(c[6]) : null,
+    };
+    const n = `Line ${i + 1}`;
+    if (/^category$/i.test(category)) return; // header row
+    if (!category || !name_en) problems.push(`${n}: needs a category and an English name.`);
+    else if ([row.govt_fee, row.service_charge, row.retailer_commission].some((v) => !Number.isFinite(v) || v < 0))
+      problems.push(`${n}: fees must be numbers.`);
+    else if (row.retailer_commission > row.service_charge) problems.push(`${n}: commission is more than the service charge.`);
+    else if (row.processing_days !== null && !Number.isInteger(row.processing_days)) problems.push(`${n}: days must be a whole number.`);
+    else if (names.has(name_en.toLowerCase())) problems.push(`${n}: “${name_en}” is already in the list.`);
+    else {
+      names.add(name_en.toLowerCase());
+      rows.push(row);
+    }
+  });
+  if (problems.length) return { error: `Nothing was added. ${problems.slice(0, 5).join(" ")}${problems.length > 5 ? ` …and ${problems.length - 5} more.` : ""}` };
+  if (rows.length === 0) return { error: "Paste at least one service." };
+
+  const newCats = [...new Set(rows.map((r) => r.category).filter((c) => !catId.has(c.toLowerCase())))];
+  if (newCats.length) {
+    const { data, error } = await supabase
+      .from("service_categories")
+      .insert(newCats.map((name) => ({ name_en: name, name_mr: name })))
+      .select("id, name_en");
+    if (error) return { error: error.message };
+    data.forEach((c) => catId.set(c.name_en.toLowerCase(), c.id));
+  }
+
+  // Codes come from the English name: "New PAN Card" -> NEW-PAN-CARD.
+  const code = (name: string) => {
+    const base = name.toUpperCase().replace(/[^A-Z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 24) || "SERVICE";
+    let c = base;
+    for (let k = 2; codes.has(c); k++) c = `${base}-${k}`;
+    codes.add(c);
+    return c;
+  };
+  const { error } = await supabase.from("services").insert(
+    rows.map(({ category, ...r }) => ({ ...r, category_id: catId.get(category.toLowerCase())!, code: code(r.name_en) })),
+  );
+  if (error) return { error: error.message };
+  revalidatePath("/admin/services");
+  return { ok: `${rows.length} service${rows.length === 1 ? "" : "s"} added.` };
+}
