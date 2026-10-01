@@ -2,9 +2,9 @@
 
 Business workflow, user roles, database and commission rules for the OMSUN website, admin web app and OMSUN Mitra app. All three share one Supabase project.
 
-Status: **draft v0.1 (2026-10-01)**. Items marked **[Decision]** follow the default recommended in the project thread and change if Aditya picks otherwise.
+Status: **v0.2 (2026-10-01)**. Items marked **[Decision]** were confirmed by Aditya on 2026-10-01.
 
-Companion file: [the Stage 1 migration](../supabase/migrations/20261001000000_stage1_schema.sql) is the full Supabase database (tables, rules, security policies). [supabase/tests/schema-test.sql](../supabase/tests/schema-test.sql) walks one retailer request and one walk-in through every rule above; it passes on PostgreSQL 16 with a small Supabase stand-in (`supabase/tests/supabase-stub.sql`).
+Companion file: [the Stage 1 migration](../supabase/migrations/20261001000000_stage1_schema.sql) is the full Supabase database (tables, rules, security policies). [tests/db/schema-test.sql](../tests/db/schema-test.sql) walks one retailer request and one walk-in through every rule above; it passes on PostgreSQL 16 with a small Supabase stand-in (`tests/db/supabase-stub.sql`).
 
 ---
 
@@ -16,6 +16,10 @@ Companion file: [the Stage 1 migration](../supabase/migrations/20261001000000_st
 | Admin web app | Owner, Manager, Accountant, Sales, Service staff | Next.js, `/admin` area |
 | OMSUN Mitra | Retailers | React Native with Expo (Android first), Marathi + English |
 | Backend | All | Supabase: Auth (mobile OTP), Postgres, Storage, Realtime, RLS |
+
+Logins **[Decision]**: staff sign in to the admin app with email and password (accounts created by the owner). Retailers sign in to OMSUN Mitra with mobile OTP (needs an SMS provider, set up in Stage 3).
+
+Marathi **[Decision]**: Claude drafts all Marathi text; the OMSUN team reviews it before release.
 
 Rules that apply everywhere:
 - The service catalogue lives in the database. Nothing about services is hard-coded in the apps.

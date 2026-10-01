@@ -4,20 +4,21 @@ One platform for OMSUN E-Services, Omerga: the public website, the admin/employe
 
 ## Status
 
-Stage 1 (business workflow, roles and database) is drafted. Apps come next, in this order: admin web app, OMSUN Mitra, payments and commissions, notifications, analytics.
+Stage 1 (business workflow, roles and database) is done. Stage 2, the admin web app, is in `web/`. Next: OMSUN Mitra, payments and commissions, notifications, analytics.
 
 ## Layout
 
 | Path | What |
 |---|---|
+| [web/](web/) | Next.js admin web app (and later the public website). See [web/README.md](web/README.md) |
 | [docs/stage1-spec.md](docs/stage1-spec.md) | Request lifecycle, role permissions, payments, commissions and settlements |
 | [supabase/migrations/](supabase/migrations/) | Database schema, rules and security policies |
-| [supabase/tests/](supabase/tests/) | Rule tests run against a local PostgreSQL with a Supabase stand-in |
+| [tests/db/](tests/db/) | Rule tests run against a local PostgreSQL with a Supabase stand-in |
 | [scripts/test-db.sh](scripts/test-db.sh) | Runs those tests |
 
 ## Database
 
-To set up a new Supabase project, run the files in `supabase/migrations/` in order (SQL editor, or `supabase db push`).
+To set up a new Supabase project, run the files in `supabase/migrations/` in order (SQL editor, or `supabase db push`). For a local copy, `supabase start` uses `supabase/config.toml`.
 
 To test locally (PostgreSQL 16):
 

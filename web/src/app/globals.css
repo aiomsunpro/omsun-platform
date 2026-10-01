@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-noto-sans), var(--font-noto-devanagari), Arial, sans-serif;
+}
+
+body {
+  background: #f5f8ff;
+  color: #111827;
+}
+
+/* Headings, labels, buttons, menu items, tabs and table headers start each
+   word with a capital letter ("Service Asked About"). Typed values and
+   dropdown choices keep their own case. Kept in the base layer so a
+   `normal-case` or `uppercase` class still wins. */
+@layer base {
+  h1, h2, h3, h4, label, legend, dt, button, th, aside nav, a[class*="rounded-"] {
+    text-transform: capitalize;
+  }
+  input, select, textarea, option {
+    text-transform: none;
+  }
+}
