@@ -2,7 +2,7 @@ import { can, requireStaff } from "@/lib/auth";
 import { dateIST } from "@/lib/format";
 import type { Retailer } from "@/lib/types";
 import { ActionForm } from "@/components/action-form";
-import { Card, Empty, Field, inputClass, PageTitle, Table } from "@/components/ui";
+import { Card, Empty, Field, inputBase, inputClass, PageTitle, Table } from "@/components/ui";
 import { addRetailer, setJoiningFeePaid, setRetailerStatus } from "./actions";
 
 const STATUS_STYLE: Record<Retailer["status"], string> = {
@@ -24,7 +24,7 @@ export default async function RetailersPage({ searchParams }: { searchParams: Pr
     <>
       <PageTitle title="Retailers (OMSUN E Sewa Kendra)" />
       <form className="mb-4 flex gap-3">
-        <select name="status" defaultValue={status} className={`${inputClass} w-auto`}>
+        <select name="status" defaultValue={status} className={`${inputBase} w-auto`}>
           <option value="all">All</option>
           <option value="pending">Awaiting approval</option>
           <option value="approved">Approved</option>

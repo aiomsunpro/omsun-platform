@@ -2,7 +2,7 @@ import { requireStaff } from "@/lib/auth";
 import { dateIST, ROLE_LABEL } from "@/lib/format";
 import type { AppRole } from "@/lib/types";
 import { ActionForm } from "@/components/action-form";
-import { inputClass, PageTitle, Table } from "@/components/ui";
+import { inputBase, PageTitle, Table } from "@/components/ui";
 import { updateMember } from "./actions";
 
 type Member = {
@@ -52,7 +52,7 @@ export default async function TeamPage() {
                 {editable ? (
                   <ActionForm action={updateMember} submitLabel="Save" variant="secondary" className="flex flex-wrap items-center gap-3">
                     <input type="hidden" name="id" value={m.id} />
-                    <select name="role" defaultValue={m.role} className={`${inputClass} w-auto`}>
+                    <select name="role" defaultValue={m.role} className={`${inputBase} w-auto`}>
                       {roles.map((r) => (
                         <option key={r} value={r}>{ROLE_LABEL[r]}</option>
                       ))}

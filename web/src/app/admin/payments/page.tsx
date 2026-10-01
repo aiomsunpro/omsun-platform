@@ -3,7 +3,7 @@ import { can, requireStaff } from "@/lib/auth";
 import { dateIST, rupees } from "@/lib/format";
 import type { Payment } from "@/lib/types";
 import { ActionForm } from "@/components/action-form";
-import { Empty, inputClass, PageTitle, Table } from "@/components/ui";
+import { Empty, inputBase, PageTitle, Table } from "@/components/ui";
 import { reversePayment, verifyPayment } from "./actions";
 
 type Row = Payment & {
@@ -29,7 +29,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
     <>
       <PageTitle title="Payments" />
       <form className="mb-4 flex flex-wrap items-center gap-3">
-        <select name="status" defaultValue={status} className={`${inputClass} w-auto`}>
+        <select name="status" defaultValue={status} className={`${inputBase} w-auto`}>
           <option value="all">All</option>
           <option value="recorded">To verify</option>
           <option value="verified">Verified</option>
@@ -75,7 +75,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
                   {p.status !== "reversed" && (
                     <ActionForm action={reversePayment} submitLabel="Reverse" variant="danger" className="flex flex-wrap gap-2">
                       <input type="hidden" name="id" value={p.id} />
-                      <input name="reason" placeholder="Reason" className={`${inputClass} w-32`} />
+                      <input name="reason" placeholder="Reason" className={`${inputBase} w-32`} />
                     </ActionForm>
                   )}
                 </td>

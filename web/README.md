@@ -24,10 +24,11 @@ Only the **anon** key goes in `.env.local`. Never put the service-role key in th
 
 | Path | Who | What |
 |---|---|---|
-| `/admin` | All staff | Dashboard: open work, today's completions and collections, retailers |
+| `/admin` | All staff | Dashboard: greeting, overdue alert, quick buttons, customer search, today / overall / center overview cards, action-required list |
 | `/admin/requests` | Staff (service executives see only their own) | Request list with status filter and search |
 | `/admin/requests/[id]` | Staff | Request detail: status changes, assignment, documents, payments, history |
 | `/admin/requests/new` | Owner, manager, service executive | Walk-in request with daily token |
+| `/admin/customers` | All staff | Customer search by name or mobile, with their requests |
 | `/admin/services` | All staff (owner/manager edit) | Service catalogue, prices, commission, required documents |
 | `/admin/retailers` | Owner, manager, accountant, sales | Add, approve, suspend retailers; joining fee |
 | `/admin/payments` | Owner, manager, accountant | Verify or reverse payments |

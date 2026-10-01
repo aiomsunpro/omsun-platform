@@ -2,7 +2,7 @@ import Link from "next/link";
 import { can, requireStaff } from "@/lib/auth";
 import { dateIST, OPEN_STATUSES, rupees, STATUS_LABEL } from "@/lib/format";
 import type { RequestStatus } from "@/lib/types";
-import { Empty, inputClass, PageTitle, StatusBadge, Table } from "@/components/ui";
+import { Empty, inputBase, PageTitle, StatusBadge, Table } from "@/components/ui";
 
 type Row = {
   id: string;
@@ -23,12 +23,12 @@ type Row = {
 export default async function RequestsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; q?: string }>;
+  searchParams: Promise<{ status?: string; q?: string; customer?: string }>;
 }) {
   const { supabase, profile } = await requireStaff([
     "owner", "manager", "accountant", "sales_executive", "service_executive",
   ]);
-  const { status = "open", q = "" } = await searchParams;
+  const { status = "open", q = "", customer = "" } = await searchParams;
 
   let query = supabase
     .from("service_requests")
@@ -40,6 +40,7 @@ export default async function RequestsPage({
   if (status === "open") query = query.in("status", OPEN_STATUSES);
   else if (status !== "all") query = query.eq("status", status);
   if (q) query = query.ilike("request_number", `%${q.trim()}%`);
+  if (customer) query = query.eq("customer_id", customer);
 
   const { data, error } = await query.returns<Row[]>();
 
@@ -54,14 +55,14 @@ export default async function RequestsPage({
       </PageTitle>
 
       <form className="mb-4 flex flex-wrap gap-3">
-        <select name="status" defaultValue={status} className={`${inputClass} w-auto`}>
+        <select name="status" defaultValue={status} className={`${inputBase} w-auto`}>
           <option value="open">All open</option>
           <option value="all">Everything</option>
           {(Object.keys(STATUS_LABEL) as RequestStatus[]).map((s) => (
             <option key={s} value={s}>{STATUS_LABEL[s]}</option>
           ))}
         </select>
-        <input name="q" defaultValue={q} placeholder="Request number" className={`${inputClass} w-48`} />
+        <input name="q" defaultValue={q} placeholder="Request number" className={`${inputBase} w-48`} />
         <button className="rounded-md border border-blue-200 bg-white px-4 py-2 text-sm text-blue-800 hover:bg-blue-50">Filter</button>
       </form>
 
