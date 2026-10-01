@@ -1,0 +1,12 @@
+# Netlify builds the admin web app, which lives in web/.
+[build]
+  base = "web"
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Turns the Next server parts (pages, login, server actions) into Netlify functions.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
