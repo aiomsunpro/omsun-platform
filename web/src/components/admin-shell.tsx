@@ -4,12 +4,23 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
+  ArrowLeftRight,
+  BadgeCheck,
   Bell,
+  BellRing,
+  CalendarDays,
+  ChartColumn,
+  CircleHelp,
   CirclePlus,
   ClipboardList,
+  HandCoins,
+  Image as ImageIcon,
   LayoutDashboard,
   LogOut,
+  Megaphone,
   Menu,
+  MessageCircle,
+  Receipt,
   Settings,
   Store,
   UserCog,
@@ -19,12 +30,20 @@ import {
 } from "lucide-react";
 import type { AppRole } from "@/lib/types";
 
-type NavItem = { href: string; label: string; icon: LucideIcon; roles?: AppRole[] };
+type NavItem = { href: string; label: string; icon: LucideIcon; roles?: AppRole[]; soon?: boolean };
 
 const ALL_STAFF: AppRole[] = ["owner", "manager", "accountant", "sales_executive", "service_executive"];
+const MONEY: AppRole[] = ["owner", "manager", "accountant"];
+const SALES: AppRole[] = ["owner", "manager", "sales_executive"];
 
 const GROUPS: { title: string; items: NavItem[] }[] = [
-  { title: "Main", items: [{ href: "/admin", label: "Dashboard", icon: LayoutDashboard }] },
+  {
+    title: "Main",
+    items: [
+      { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/admin/cashbook", label: "Inflow & Outflow", icon: ArrowLeftRight, roles: MONEY },
+    ],
+  },
   {
     title: "Service",
     items: [
@@ -35,19 +54,45 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
   },
   {
     title: "Customer",
-    items: [{ href: "/admin/customers", label: "Customer Management", icon: Users }],
+    items: [
+      { href: "/admin/customers", label: "Customer Management", icon: Users },
+      { href: "/admin/documents", label: "Verified Docs", icon: BadgeCheck, roles: ["owner", "manager", "accountant", "service_executive"] },
+    ],
+  },
+  {
+    title: "Leads",
+    items: [
+      { href: "/admin/enquiries", label: "Enquiries", icon: CircleHelp, roles: [...SALES, "service_executive"] },
+      { href: "/admin/leads", label: "Lead Management", icon: Megaphone, roles: SALES },
+      { href: "/admin/reminders", label: "Reminders", icon: BellRing, roles: [...SALES, "service_executive"] },
+    ],
   },
   {
     title: "Retailers",
-    items: [{ href: "/admin/retailers", label: "OMSUN Mitra Retailers", icon: Store, roles: ["owner", "manager", "accountant", "sales_executive"] }],
+    items: [
+      { href: "/admin/retailers", label: "OMSUN Mitra Retailers", icon: Store, roles: ["owner", "manager", "accountant", "sales_executive"] },
+      { href: "/admin/settlements", label: "Retailer Settlements", icon: HandCoins, roles: MONEY },
+    ],
   },
   {
-    title: "Accounts",
-    items: [{ href: "/admin/payments", label: "Payments", icon: Wallet, roles: ["owner", "manager", "accountant"] }],
+    title: "Marketing",
+    items: [
+      { href: "#whatsapp", label: "WhatsApp Campaigns", icon: MessageCircle, roles: SALES, soon: true },
+      { href: "#designs", label: "Creative Designs", icon: ImageIcon, roles: SALES, soon: true },
+    ],
   },
   {
-    title: "Admin",
-    items: [{ href: "/admin/team", label: "Team & Roles", icon: UserCog, roles: ["owner", "manager"] }],
+    title: "User Authority",
+    items: [{ href: "/admin/team", label: "Staff Management", icon: UserCog, roles: ["owner", "manager"] }],
+  },
+  {
+    title: "Reports",
+    items: [
+      { href: "/admin/reports/leads", label: "Lead Reports", icon: ChartColumn, roles: SALES },
+      { href: "/admin/payments", label: "Customer Payments", icon: Wallet, roles: MONEY },
+      { href: "/admin/reports/daily", label: "EOD Report", icon: Receipt, roles: MONEY },
+      { href: "/admin/reports/monthly", label: "Monthly Report", icon: CalendarDays, roles: MONEY },
+    ],
   },
 ];
 
@@ -76,7 +121,7 @@ export function AdminShell({
 
   // The most specific menu entry that matches the current page is highlighted.
   const activeHref = groups
-    .flatMap((g) => g.items.map((i) => i.href))
+    .flatMap((g) => g.items.filter((i) => !i.soon).map((i) => i.href))
     .filter((h) => pathname === h || (h !== "/admin" && pathname.startsWith(h + "/")))
     .sort((a, b) => b.length - a.length)[0];
   const isActive = (href: string) => href === activeHref;
@@ -102,6 +147,11 @@ export function AdminShell({
           {canWalkIn && (
             <Link href="/admin/requests/new" title="New walk-in" className="rounded-md bg-green-600 p-2 hover:bg-green-500">
               <CirclePlus size={18} />
+            </Link>
+          )}
+          {["owner", "manager", "sales_executive", "service_executive"].includes(role) && (
+            <Link href="/admin/enquiries#new" title="New enquiry" className="rounded-md bg-teal-600 p-2 hover:bg-teal-500">
+              <CircleHelp size={18} />
             </Link>
           )}
           <Link href="/admin/requests" title="Service requests" className="rounded-md bg-white/15 p-2 hover:bg-white/25">
@@ -142,19 +192,31 @@ export function AdminShell({
               {groups.map((g) => (
                 <div key={g.title} className="mb-2 border-b border-white/10 pb-2">
                   <p className="px-6 pb-1 pt-2 text-[11px] font-bold uppercase tracking-widest text-blue-300/70">{g.title}</p>
-                  {g.items.map((i) => (
-                    <Link
-                      key={i.href}
-                      href={i.href}
-                      onClick={() => setOpen(false)}
-                      className={`mx-3 flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-semibold ${
-                        isActive(i.href) ? "bg-yellow-400 text-blue-950" : "hover:bg-white/10"
-                      }`}
-                    >
-                      <i.icon size={18} />
-                      {i.label}
-                    </Link>
-                  ))}
+                  {g.items.map((i) =>
+                    i.soon ? (
+                      <span
+                        key={i.href}
+                        title="Coming soon"
+                        className="mx-3 flex cursor-default items-center gap-3 rounded-md px-3 py-2.5 text-sm font-semibold text-blue-300/60"
+                      >
+                        <i.icon size={18} />
+                        {i.label}
+                        <span className="ml-auto rounded bg-white/10 px-1.5 text-[10px] uppercase">Soon</span>
+                      </span>
+                    ) : (
+                      <Link
+                        key={i.href}
+                        href={i.href}
+                        onClick={() => setOpen(false)}
+                        className={`mx-3 flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-semibold ${
+                          isActive(i.href) ? "bg-yellow-400 text-blue-950" : "hover:bg-white/10"
+                        }`}
+                      >
+                        <i.icon size={18} />
+                        {i.label}
+                      </Link>
+                    ),
+                  )}
                 </div>
               ))}
               <form action={signOut}>

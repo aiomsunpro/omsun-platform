@@ -2,7 +2,7 @@ import type { AppRole, RequestStatus } from "./types";
 
 export function rupees(value: number | string | null | undefined) {
   const n = Number(value ?? 0);
-  return "₹" + n.toLocaleString("en-IN", { maximumFractionDigits: 2 });
+  return (n < 0 ? "-₹" : "₹") + Math.abs(n).toLocaleString("en-IN", { maximumFractionDigits: 2 });
 }
 
 export function dateIST(value: string | null | undefined, withTime = false) {

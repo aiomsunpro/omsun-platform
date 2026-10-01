@@ -33,3 +33,12 @@ Only the **anon** key goes in `.env.local`. Never put the service-role key in th
 | `/admin/retailers` | Owner, manager, accountant, sales | Add, approve, suspend retailers; joining fee |
 | `/admin/payments` | Owner, manager, accountant | Verify or reverse payments |
 | `/admin/team` | Owner, manager | Give staff their roles, deactivate accounts |
+| `/admin/cashbook` | Owner, manager, accountant | Inflow & Outflow: payments plus other money in and out, cash in hand |
+| `/admin/documents` | Owner, manager, accountant, service executive | Verified Docs: customer documents by check status |
+| `/admin/enquiries` | Owner, manager, sales, service executive | Customers who asked about a service; turn one into a walk-in |
+| `/admin/leads` | Owner, manager, sales | Retailer leads by stage; `/admin/leads/[id]` logs calls and follow-ups |
+| `/admin/reminders` | Owner, manager, sales, service executive | Follow-ups overdue, today and in the next 7 days |
+| `/admin/settlements` | Owner, manager, accountant (owner/accountant edit) | Monthly retailer settlements: draft and finalize |
+| `/admin/reports/daily` | Owner, manager, accountant | EOD report per staff member |
+| `/admin/reports/monthly` | Owner, manager, accountant | Month by service and by day |
+| `/admin/reports/leads` | Owner, manager, sales | Leads and enquiries per staff member |

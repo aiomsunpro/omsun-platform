@@ -111,8 +111,6 @@ function nowIST() {
   return { date: `${get("year")}-${get("month")}-${get("day")}`, hour: Number(get("hour")), ms: Date.now() };
 }
 
-const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
-
 export default async function Dashboard() {
   const { supabase, profile } = await requireStaff();
   const { date: today, hour, ms: now } = nowIST();
@@ -121,21 +119,17 @@ export default async function Dashboard() {
   const seesRetailers = can(profile, "owner", "manager", "accountant", "sales_executive");
 
   // Everything below is already limited by row-level security (a service executive sees only their own work).
-  const { data: reqData } = await supabase
+  const { data: openData } = await supabase
     .from("service_requests")
     .select("id, request_number, status, assigned_to, submitted_at, amount_due, amount_paid, services(name_en, processing_days), customers(full_name)")
-    .not("status", "in", "(cancelled,rejected)")
+    .in("status", OPEN_STATUSES)
     .order("submitted_at", { ascending: true })
-    .limit(5000)
+    .limit(1000)
     .returns<Req[]>();
-  const reqs = reqData ?? [];
-  const open = reqs.filter((r) => OPEN_STATUSES.includes(r.status));
+  const open = openData ?? [];
   const overdue = open.filter(
     (r) => r.services?.processing_days != null && new Date(r.submitted_at).getTime() + r.services.processing_days * 86400000 < now,
   );
-  const todayStart = new Date(startToday).getTime();
-  const todays = reqs.filter((r) => new Date(r.submitted_at).getTime() >= todayStart);
-  const due = (r: Req) => Math.max(Number(r.amount_due) - Number(r.amount_paid), 0);
 
   const { count: completedToday } = await supabase
     .from("service_requests")
@@ -143,17 +137,18 @@ export default async function Dashboard() {
     .eq("status", "completed")
     .gte("completed_at", startToday);
 
-  let collectedToday = 0;
-  let receivedAll = 0;
-  if (seesMoney) {
-    const { data: pays } = await supabase.from("payments").select("amount, paid_on").neq("status", "reversed").limit(20000);
-    receivedAll = sum((pays ?? []).map((p) => Number(p.amount)));
-    collectedToday = sum((pays ?? []).filter((p) => p.paid_on === today).map((p) => Number(p.amount)));
-  }
-  const businessToday = sum(todays.map((r) => Number(r.amount_due)));
-  const pendingToday = sum(todays.map(due));
-  const businessAll = sum(reqs.map((r) => Number(r.amount_due)));
-  const pendingAll = sum(reqs.map(due));
+  // Money totals are summed in the database (business_totals), not over a page of rows.
+  const { data: totals } = await supabase.rpc("business_totals", { p_day: today }).single<{
+    received_all: number; collected_day: number; business_all: number; pending_all: number;
+    business_day: number; pending_day: number; requests_day: number;
+  }>();
+  const collectedToday = seesMoney ? Number(totals?.collected_day ?? 0) : 0;
+  const receivedAll = seesMoney ? Number(totals?.received_all ?? 0) : 0;
+  const businessToday = Number(totals?.business_day ?? 0);
+  const pendingToday = Number(totals?.pending_day ?? 0);
+  const businessAll = Number(totals?.business_all ?? 0);
+  const pendingAll = Number(totals?.pending_all ?? 0);
+  const requestsToday = Number(totals?.requests_day ?? 0);
   const rateToday = businessToday ? Math.round(((businessToday - pendingToday) / businessToday) * 100) : 0;
   const rateAll = businessAll ? Math.round(((businessAll - pendingAll) / businessAll) * 100) : 0;
 
@@ -258,7 +253,7 @@ export default async function Dashboard() {
             <StatCard label="Today pending" value={rupees(pendingToday)} note="Unpaid from today's requests" href="/admin/requests" icon={Clock} tone="red" />
           )}
           {seesMoney && (
-            <StatCard label="Today's business" value={rupees(businessToday)} note={`${todays.length} new request${todays.length === 1 ? "" : "s"} today`} icon={Briefcase} tone="blue" />
+            <StatCard label="Today's business" value={rupees(businessToday)} note={`${requestsToday} new request${requestsToday === 1 ? "" : "s"} today`} icon={Briefcase} tone="blue" />
           )}
           {seesMoney && (
             <StatCard label="Collection rate" value={`${rateToday}%`} note="Paid share of today's business" icon={TrendingUp} tone="orange">

@@ -4,8 +4,14 @@ import { ActionForm } from "@/components/action-form";
 import { Card, Field, inputClass, PageTitle } from "@/components/ui";
 import { createWalkIn } from "../actions";
 
-export default async function NewWalkIn() {
+export default async function NewWalkIn({
+  searchParams,
+}: {
+  searchParams: Promise<{ name?: string; mobile?: string; village?: string; service?: string }>;
+}) {
   const { supabase, profile } = await requireStaff(["owner", "manager", "service_executive"]);
+  // Filled in when staff turn an enquiry into a request.
+  const pre = await searchParams;
   const { data: services } = await supabase
     .from("services")
     .select("id, code, name_en, customer_price")
@@ -29,20 +35,20 @@ export default async function NewWalkIn() {
             </p>
             <div className="grid gap-3 sm:grid-cols-2">
               <Field label="Customer name *">
-                <input name="full_name" required className={inputClass} />
+                <input name="full_name" required defaultValue={pre.name} className={inputClass} />
               </Field>
               <Field label="Mobile (10 digits)">
-                <input name="mobile" inputMode="numeric" className={inputClass} />
+                <input name="mobile" inputMode="numeric" defaultValue={pre.mobile} className={inputClass} />
               </Field>
               <Field label="Village">
-                <input name="village" className={inputClass} />
+                <input name="village" defaultValue={pre.village} className={inputClass} />
               </Field>
               <Field label="Taluka">
                 <input name="taluka" defaultValue="Omerga" className={inputClass} />
               </Field>
             </div>
             <Field label="Service *">
-              <select name="service_id" required className={inputClass} defaultValue="">
+              <select name="service_id" required className={inputClass} defaultValue={pre.service ?? ""}>
                 <option value="" disabled>Choose a service</option>
                 {services?.map((s) => (
                   <option key={s.id} value={s.id}>
