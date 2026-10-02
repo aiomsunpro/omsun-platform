@@ -42,6 +42,11 @@
           "photosPermission": "OMSUN Mitra lets you attach customer documents from your photos."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "02b90bec-9a9e-4b3c-9044-9f343c051743"
+      }
+    }
   }
 }
