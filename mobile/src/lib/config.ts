@@ -10,3 +10,6 @@ export const DOCUMENTS_BUCKET = "request-documents";
 
 /** OMSUN office number for the "Call Office" button. Leave empty to hide it. */
 export const OFFICE_PHONE = process.env.EXPO_PUBLIC_OFFICE_PHONE ?? "";
+
+/** Public pages the app links to (Play Store requires both). */
+export const PRIVACY_URL = "https://omsunesewakendra.com/privacy";
