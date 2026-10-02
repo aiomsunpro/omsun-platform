@@ -4,13 +4,14 @@ One platform for OMSUN E-Services, Omerga: the public website, the admin/employe
 
 ## Status
 
-Stage 1 (business workflow, roles and database) is done. Stage 2, the admin web app, is in `web/`. Next: OMSUN Mitra, payments and commissions, notifications, analytics.
+Stage 1 (business workflow, roles and database) is done. Stage 2, the admin web app, is in `web/`. Stage 3, the OMSUN Mitra retailer app, is in `mobile/`. Next: payments and commissions, notifications, analytics.
 
 ## Layout
 
 | Path | What |
 |---|---|
 | [web/](web/) | Next.js admin web app (and later the public website). See [web/README.md](web/README.md) |
+| [mobile/](mobile/) | OMSUN Mitra retailer app (Expo, Android first). See [mobile/README.md](mobile/README.md) |
 | [docs/stage1-spec.md](docs/stage1-spec.md) | Request lifecycle, role permissions, payments, commissions and settlements |
 | [supabase/migrations/](supabase/migrations/) | Database schema, rules and security policies |
 | [tests/db/](tests/db/) | Rule tests run against a local PostgreSQL with a Supabase stand-in |

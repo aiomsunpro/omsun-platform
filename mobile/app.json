@@ -1,0 +1,47 @@
+{
+  "expo": {
+    "name": "OMSUN Mitra",
+    "slug": "omsun-mitra",
+    "scheme": "omsunmitra",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "in.omsun.mitra"
+    },
+    "android": {
+      "package": "in.omsun.mitra",
+      "adaptiveIcon": {
+        "backgroundColor": "#FFFFFF",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160,
+          "backgroundColor": "#FFFFFF"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "OMSUN Mitra uses the camera to photograph customer documents.",
+          "photosPermission": "OMSUN Mitra lets you attach customer documents from your photos."
+        }
+      ]
+    ]
+  }
+}
