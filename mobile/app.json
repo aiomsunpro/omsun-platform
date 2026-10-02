@@ -3,7 +3,7 @@
     "name": "OMSUN Mitra",
     "slug": "omsun-mitra",
     "scheme": "omsunmitra",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -47,6 +47,12 @@
       "eas": {
         "projectId": "02b90bec-9a9e-4b3c-9044-9f343c051743"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/02b90bec-9a9e-4b3c-9044-9f343c051743"
     }
   }
 }

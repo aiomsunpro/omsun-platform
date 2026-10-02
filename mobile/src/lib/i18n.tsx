@@ -189,6 +189,12 @@ const en = {
   markAllRead: "Mark All As Read",
   callOffice: "Call OMSUN Office",
   appVersion: "App Version",
+  privacyPolicy: "Privacy Policy",
+  deleteAccount: "Delete My Account",
+  deleteAccountConfirm:
+    "We will send a request to the OMSUN office to delete your account and personal data. The office will call you to confirm, and it is done within 30 days. Continue?",
+  deleteAccountSent: "Request sent. The OMSUN office will call you to confirm.",
+  confirm: "Yes, Send Request",
   noCustomers: "No customers yet. They are added when you create a request.",
 
   // generic
@@ -378,6 +384,12 @@ const mr: Record<StringKey, string> = {
   markAllRead: "सर्व वाचले",
   callOffice: "ओमसन ऑफिसला फोन करा",
   appVersion: "ॲप आवृत्ती",
+  privacyPolicy: "गोपनीयता धोरण",
+  deleteAccount: "माझे खाते हटवा",
+  deleteAccountConfirm:
+    "तुमचे खाते आणि वैयक्तिक माहिती हटवण्याची विनंती ओमसन ऑफिसला पाठवली जाईल. ऑफिस तुम्हाला कॉल करून खात्री करेल आणि ३० दिवसांत खाते हटवले जाईल. पुढे जायचे?",
+  deleteAccountSent: "विनंती पाठवली. ओमसन ऑफिस तुम्हाला कॉल करेल.",
+  confirm: "हो, विनंती पाठवा",
   noCustomers: "अजून ग्राहक नाहीत. अर्ज करताना ग्राहक जोडले जातात.",
 
   save: "जतन करा",

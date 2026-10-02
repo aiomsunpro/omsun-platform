@@ -919,7 +919,8 @@ function Footer() {
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 text-xs text-blue-200 md:flex-row">
           <div>© {new Date().getFullYear()} OMSUN E सेवा केंद्र. सर्व हक्क राखीव.</div>
           <div className="flex gap-5">
-            <a href="#" className="transition-colors hover:text-[#2563eb]">Privacy Policy</a>
+            <a href="/privacy" className="transition-colors hover:text-[#2563eb]">Privacy Policy</a>
+            <a href="/delete-account" className="transition-colors hover:text-[#2563eb]">Delete Account</a>
             <a href="#" className="transition-colors hover:text-[#2563eb]">Terms & Conditions</a>
           </div>
         </div>
