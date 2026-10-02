@@ -14,6 +14,7 @@ import {
   Button, Card, CardContent, Input, Label, Textarea, Toaster, toast,
 } from "@/components/site/ui";
 import { Facebook, Instagram, Twitter, Youtube } from "@/components/site/brand-icons";
+import { submitEnquiry } from "@/components/site/actions";
 
 const logo = "/site/logo.jpg";
 const hero = "/site/hero.jpg";
@@ -706,10 +707,24 @@ function FAQ() {
 }
 
 function Contact() {
-  const onSubmit = (e: React.FormEvent) => {
+  const [sending, setSending] = useState(false);
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    toast.success("तुमचा अर्ज मिळाला! आम्ही लवकरच कॉल करू.");
-    (e.target as HTMLFormElement).reset();
+    const form = e.currentTarget;
+    setSending(true);
+    try {
+      const result = await submitEnquiry(new FormData(form));
+      if (result.ok) {
+        toast.success("तुमचा अर्ज मिळाला! आम्ही लवकरच कॉल करू.");
+        form.reset();
+      } else {
+        toast.error(result.message);
+      }
+    } catch {
+      toast.error("अर्ज पाठवता आला नाही. कृपया पुन्हा प्रयत्न करा किंवा आम्हाला कॉल करा.");
+    } finally {
+      setSending(false);
+    }
   };
   return (
     <section id="contact" className="bg-slate-50 py-20">
@@ -725,31 +740,32 @@ function Contact() {
               <form onSubmit={onSubmit} className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <Label>पूर्ण नाव *</Label>
-                  <Input required className="mt-1.5 h-11" placeholder="तुमचे पूर्ण नाव" />
+                  <Input required name="full_name" maxLength={100} autoComplete="name" className="mt-1.5 h-11" placeholder="तुमचे पूर्ण नाव" />
                 </div>
                 <div>
                   <Label>मोबाईल नंबर *</Label>
-                  <Input required type="tel" className="mt-1.5 h-11" placeholder="98XXXXXXXX" />
+                  <Input required name="mobile" type="tel" inputMode="numeric" maxLength={14} autoComplete="tel" className="mt-1.5 h-11" placeholder="98XXXXXXXX" />
                 </div>
                 <div>
                   <Label>गाव *</Label>
-                  <Input required className="mt-1.5 h-11" placeholder="गावाचे नाव" />
+                  <Input required name="village" maxLength={100} className="mt-1.5 h-11" placeholder="गावाचे नाव" />
                 </div>
                 <div>
                   <Label>जिल्हा *</Label>
-                  <Input required className="mt-1.5 h-11" placeholder="जिल्हा" />
+                  <Input required name="district" maxLength={100} className="mt-1.5 h-11" placeholder="जिल्हा" />
                 </div>
                 <div className="sm:col-span-2">
                   <Label>सध्याचा व्यवसाय</Label>
-                  <Input className="mt-1.5 h-11" placeholder="उदा. शेती, दुकान, नोकरी" />
+                  <Input name="business_type" maxLength={200} className="mt-1.5 h-11" placeholder="उदा. शेती, दुकान, नोकरी" />
                 </div>
                 <div className="sm:col-span-2">
                   <Label>इच्छुक सेवा</Label>
-                  <Textarea className="mt-1.5" placeholder="कोणत्या सेवांमध्ये रस आहे?" rows={3} />
+                  <Textarea name="interest" maxLength={1000} className="mt-1.5" placeholder="कोणत्या सेवांमध्ये रस आहे?" rows={3} />
                 </div>
                 <div className="sm:col-span-2">
-                  <Button type="submit" size="lg" className="w-full bg-[#2563eb] text-white hover:bg-[#1d4ed8]">
-                    कॉलबॅक मिळवा <ArrowRight className="ml-2 h-4 w-4" />
+                  <input type="text" name="company" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
+                  <Button type="submit" size="lg" disabled={sending} className="w-full bg-[#2563eb] text-white hover:bg-[#1d4ed8]">
+                    {sending ? "पाठवत आहे…" : "कॉलबॅक मिळवा"} <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </div>
               </form>
