@@ -14,7 +14,7 @@ import {
   Button, Card, CardContent, Input, Label, Textarea, Toaster, toast,
 } from "@/components/site/ui";
 import { Facebook, Instagram, Twitter, Youtube } from "@/components/site/brand-icons";
-import { submitEnquiry } from "@/components/site/actions";
+import { submitEnquiry, trackRequest, type TrackResult } from "@/components/site/actions";
 
 const logo = "/site/logo.jpg";
 const hero = "/site/hero.jpg";
@@ -530,27 +530,52 @@ function Testimonials() {
   );
 }
 
+// Steps a customer sees for a service request (OMSUN request statuses grouped).
 const STATUS_FLOW = [
-  { k: "Pending", l: "Pending" },
-  { k: "Verification", l: "Verification सुरू" },
-  { k: "Approved", l: "Approved" },
-  { k: "Training", l: "Training Scheduled" },
-  { k: "Activated", l: "Activated" },
+  { k: "submitted", l: "अर्ज मिळाला" },
+  { k: "documents", l: "कागदपत्रे" },
+  { k: "processing", l: "प्रक्रिया सुरू" },
+  { k: "completed", l: "पूर्ण झाले" },
 ];
+const STEP_OF: Record<string, number> = {
+  new: 0, assigned: 0, documents_required: 1, documents_received: 1, under_process: 2, pending: 2, completed: 3,
+};
+const STATUS_NOTE: Record<string, string> = {
+  new: "तुमचा अर्ज मिळाला आहे.",
+  assigned: "तुमचा अर्ज आमच्या टीमकडे दिला आहे.",
+  documents_required: "कागदपत्रे हवी आहेत. कृपया केंद्राशी संपर्क करा.",
+  documents_received: "कागदपत्रे मिळाली, तपासणी सुरू आहे.",
+  under_process: "तुमच्या अर्जावर काम सुरू आहे.",
+  pending: "अर्ज सरकारी कार्यालयात प्रलंबित आहे.",
+  completed: "तुमचे काम पूर्ण झाले आहे.",
+  rejected: "अर्ज नाकारला गेला. कृपया केंद्राशी संपर्क करा.",
+  cancelled: "अर्ज रद्द झाला आहे.",
+};
+const dateMr = (v: string) => new Date(v).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short", year: "numeric" });
 
 function StatusTracker() {
-  const [query, setQuery] = useState("");
-  const [shown, setShown] = useState(false);
-  const [stepIdx, setStepIdx] = useState(2);
-  const onCheck = (e: React.FormEvent) => {
+  const [number, setNumber] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState<Extract<TrackResult, { ok: true }> | null>(null);
+  const onCheck = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!query.trim()) {
-      toast.error("कृपया अर्ज आयडी किंवा मोबाईल नंबर टाका");
-      return;
+    setBusy(true);
+    try {
+      const r = await trackRequest(number, mobile);
+      if (r.ok) setResult(r);
+      else {
+        setResult(null);
+        toast.error(r.message);
+      }
+    } catch {
+      toast.error("स्थिती तपासता आली नाही. कृपया पुन्हा प्रयत्न करा.");
+    } finally {
+      setBusy(false);
     }
-    setStepIdx(Math.floor(Math.random() * 5));
-    setShown(true);
   };
+  const stepIdx = result ? STEP_OF[result.status] ?? -1 : -1;
+  const stopped = result && (result.status === "rejected" || result.status === "cancelled");
   return (
     <section id="status" className="bg-white py-20">
       <div className="mx-auto max-w-5xl px-4 lg:px-8">
@@ -559,7 +584,7 @@ function StatusTracker() {
             ट्रॅकिंग
           </div>
           <h2 className="text-3xl font-extrabold text-[#0b1f4d] sm:text-4xl">अर्जाची स्थिती तपासा</h2>
-          <p className="mt-3 text-slate-600">तुमचा अर्ज आयडी किंवा रजिस्टर्ड मोबाईल नंबर टाका.</p>
+          <p className="mt-3 text-slate-600">पावतीवरील अर्ज क्रमांक आणि अर्ज करताना दिलेला मोबाईल नंबर टाका.</p>
         </div>
         <Card className="border-blue-100 shadow-xl">
           <CardContent className="p-6 md:p-8">
@@ -567,51 +592,67 @@ function StatusTracker() {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="अर्ज आयडी किंवा मोबाईल नंबर"
+                  value={number}
+                  onChange={(e) => setNumber(e.target.value)}
+                  placeholder="अर्ज क्रमांक (उदा. OMS-2610-000123)"
+                  aria-label="अर्ज क्रमांक"
                   className="h-12 pl-10"
                 />
               </div>
-              <Button type="submit" className="h-12 bg-[#2563eb] px-8 text-white hover:bg-[#1d4ed8]">
-                ट्रॅक करा
+              <Input
+                value={mobile}
+                onChange={(e) => setMobile(e.target.value)}
+                type="tel"
+                inputMode="numeric"
+                maxLength={14}
+                placeholder="मोबाईल नंबर"
+                aria-label="मोबाईल नंबर"
+                className="h-12 md:w-48"
+              />
+              <Button type="submit" disabled={busy} className="h-12 bg-[#2563eb] px-8 text-white hover:bg-[#1d4ed8]">
+                {busy ? "तपासत आहे…" : "ट्रॅक करा"}
               </Button>
             </form>
-            {shown && (
+            {result && (
               <div className="animate-fade-up mt-8">
-                <div className="mb-6 rounded-xl bg-blue-50 p-4 text-sm">
-                  <span className="font-semibold text-[#0b1f4d]">अर्ज आयडी:</span>{" "}
-                  <span className="text-[#2563eb]">{query}</span>
+                <div className="mb-6 grid gap-1 rounded-xl bg-blue-50 p-4 text-sm sm:grid-cols-2">
+                  <div><span className="font-semibold text-[#0b1f4d]">अर्ज क्रमांक:</span> <span className="text-[#2563eb]">{result.requestNumber}</span></div>
+                  <div><span className="font-semibold text-[#0b1f4d]">सेवा:</span> {result.serviceMr || result.serviceEn}</div>
+                  <div><span className="font-semibold text-[#0b1f4d]">अर्ज दिनांक:</span> {dateMr(result.submittedAt)}</div>
+                  <div><span className="font-semibold text-[#0b1f4d]">शेवटचा बदल:</span> {dateMr(result.updatedAt)}</div>
+                  <div className={`sm:col-span-2 font-semibold ${stopped ? "text-red-600" : "text-[#0b1f4d]"}`}>{STATUS_NOTE[result.status] ?? result.status}</div>
                 </div>
-                <div className="relative">
-                  {/* Vertical line (mobile) */}
-                  <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-slate-200 md:hidden" />
-                  <div
-                    className="absolute left-4 top-0 w-0.5 bg-[#2563eb] transition-all md:hidden"
-                    style={{ height: `${(stepIdx / (STATUS_FLOW.length - 1)) * 100}%` }}
-                  />
-                  {/* Horizontal line (desktop) */}
-                  <div className="absolute left-0 right-0 top-5 hidden h-0.5 bg-slate-200 md:block" />
-                  <div
-                    className="absolute left-0 top-5 hidden h-0.5 bg-[#2563eb] transition-all md:block"
-                    style={{ width: `${(stepIdx / (STATUS_FLOW.length - 1)) * 100}%` }}
-                  />
-                  <div className="relative grid gap-6 md:grid-cols-5">
-                    {STATUS_FLOW.map((s, i) => {
-                      const done = i <= stepIdx;
-                      return (
-                        <div key={s.k} className="flex items-center gap-3 md:flex-col md:text-center">
-                          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 ${done ? "border-[#2563eb] bg-[#2563eb] text-white" : "border-slate-300 bg-white text-slate-400"} relative z-10`}>
-                            {done ? <CheckCircle2 className="h-5 w-5" /> : i + 1}
+                {!stopped && (
+                  <div className="relative">
+                    {/* Vertical line (mobile) */}
+                    <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-slate-200 md:hidden" />
+                    <div
+                      className="absolute left-4 top-0 w-0.5 bg-[#2563eb] transition-all md:hidden"
+                      style={{ height: `${(Math.max(stepIdx, 0) / (STATUS_FLOW.length - 1)) * 100}%` }}
+                    />
+                    {/* Horizontal line (desktop) */}
+                    <div className="absolute left-0 right-0 top-5 hidden h-0.5 bg-slate-200 md:block" />
+                    <div
+                      className="absolute left-0 top-5 hidden h-0.5 bg-[#2563eb] transition-all md:block"
+                      style={{ width: `${(Math.max(stepIdx, 0) / (STATUS_FLOW.length - 1)) * 100}%` }}
+                    />
+                    <div className="relative grid gap-6 md:grid-cols-4">
+                      {STATUS_FLOW.map((s, i) => {
+                        const done = i <= stepIdx;
+                        return (
+                          <div key={s.k} className="flex items-center gap-3 md:flex-col md:text-center">
+                            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 ${done ? "border-[#2563eb] bg-[#2563eb] text-white" : "border-slate-300 bg-white text-slate-400"} relative z-10`}>
+                              {done ? <CheckCircle2 className="h-5 w-5" /> : i + 1}
+                            </div>
+                            <div className={`text-sm font-semibold ${done ? "text-[#0b1f4d]" : "text-slate-400"}`}>
+                              {s.l}
+                            </div>
                           </div>
-                          <div className={`text-sm font-semibold ${done ? "text-[#0b1f4d]" : "text-slate-400"}`}>
-                            {s.l}
-                          </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
           </CardContent>
