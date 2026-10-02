@@ -4,6 +4,15 @@
   --font-sans: var(--font-noto-sans), var(--font-noto-devanagari), Arial, sans-serif;
 }
 
+/* Public website colours (copied from the original Lovable site). */
+@theme {
+  --color-site-primary: oklch(0.52 0.22 263);
+  --color-site-ink: oklch(0.2 0.08 260);
+  --color-site-muted: oklch(0.5 0.04 260);
+  --color-site-accent: oklch(0.95 0.04 260);
+  --color-site-border: oklch(0.92 0.02 260);
+}
+
 body {
   background: #f5f8ff;
   color: #111827;
@@ -20,4 +29,49 @@ body {
   input, select, textarea, option {
     text-transform: none;
   }
+}
+
+/* ---------- Public website (homepage) ---------- */
+.site {
+  background: #fff;
+  color: var(--color-site-ink);
+  font-family: var(--font-noto-devanagari), var(--font-noto-sans), system-ui, sans-serif;
+  line-height: 1.6;
+}
+html:has(.site) {
+  scroll-behavior: smooth;
+}
+/* The website keeps its own wording; skip the admin app's Title Case rule. */
+.site :is(h1, h2, h3, h4, label, legend, dt, button, th, a) {
+  text-transform: none;
+}
+@keyframes site-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+@keyframes site-fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.site .animate-float { animation: site-float 6s ease-in-out infinite; }
+.site .animate-fade-up { animation: site-fade-up 0.7s ease-out both; }
+.site .glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+.site .glass-dark {
+  background: rgba(11, 31, 77, 0.45);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.site .hero-gradient {
+  background:
+    radial-gradient(1200px 600px at 10% 0%, rgba(37, 99, 235, 0.25), transparent 60%),
+    radial-gradient(900px 500px at 90% 20%, rgba(11, 31, 77, 0.35), transparent 60%),
+    linear-gradient(135deg, #eef4ff 0%, #ffffff 50%, #e6efff 100%);
+}
+.site .dark-gradient {
+  background: linear-gradient(135deg, #0b1f4d 0%, #112a6b 50%, #1e3a8a 100%);
 }
