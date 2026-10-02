@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useI18n } from "@/lib/i18n";
-import { colors, statusColors } from "@/lib/theme";
+import { colors, shadow, statusColors } from "@/lib/theme";
 import type { RequestStatus } from "@/lib/types";
 
 export function Screen({
@@ -21,14 +21,17 @@ export function Screen({
   padded = true,
   edges = ["bottom"],
   refreshControl,
+  bottomSpace = 0,
 }: {
   children: ReactNode;
   scroll?: boolean;
   padded?: boolean;
   edges?: ("top" | "bottom")[];
   refreshControl?: React.ReactElement<any>;
+  /** Extra room at the bottom, e.g. TAB_BAR_SPACE on tab screens. */
+  bottomSpace?: number;
 }) {
-  const inner = padded ? styles.padded : undefined;
+  const inner = [padded ? styles.padded : undefined, bottomSpace ? { paddingBottom: bottomSpace } : undefined];
   return (
     <SafeAreaView style={styles.screen} edges={edges}>
       {scroll ? (
@@ -40,7 +43,7 @@ export function Screen({
           {children}
         </ScrollView>
       ) : (
-        <View style={[{ flex: 1 }, inner]}>{children}</View>
+        <View style={[{ flex: 1 }, ...inner]}>{children}</View>
       )}
     </SafeAreaView>
   );
@@ -154,13 +157,31 @@ export function Pill({ label, fg, bg }: { label: string; fg: string; bg: string 
   );
 }
 
-export function Chip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+export function Chip({
+  label,
+  active,
+  onPress,
+  onDark,
+}: {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+  /** On the blue header: the active chip turns yellow. */
+  onDark?: boolean;
+}) {
+  const activeBg = onDark ? colors.yellow : colors.blue;
   return (
     <Pressable
       onPress={onPress}
-      style={[styles.chip, active && { backgroundColor: colors.blue, borderColor: colors.blue }]}
+      style={[
+        styles.chip,
+        onDark && { backgroundColor: "rgba(255,255,255,0.15)", borderColor: "transparent" },
+        active && { backgroundColor: activeBg, borderColor: activeBg },
+      ]}
     >
-      <Text style={{ color: active ? colors.white : colors.text, fontWeight: "600" }}>{label}</Text>
+      <Text style={{ color: active ? (onDark ? colors.text : colors.white) : onDark ? colors.white : colors.text, fontWeight: "700" }}>
+        {label}
+      </Text>
     </Pressable>
   );
 }
@@ -224,11 +245,14 @@ export const styles = StyleSheet.create({
   center: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24 },
   card: {
     backgroundColor: colors.white,
-    borderRadius: 12,
+    borderRadius: 20,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: "transparent",
+    ...shadow,
+    shadowOpacity: 0.06,
+    elevation: 2,
   },
   h1: { fontSize: 22, fontWeight: "700", color: colors.text, marginBottom: 8 },
   h2: { fontSize: 17, fontWeight: "700", color: colors.text, marginBottom: 8 },
@@ -238,8 +262,8 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 10,
-    paddingHorizontal: 12,
+    borderRadius: 14,
+    paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 16,
     color: colors.text,
@@ -247,9 +271,9 @@ export const styles = StyleSheet.create({
   error: { color: colors.red, marginTop: 4, fontSize: 13 },
   errorBox: { backgroundColor: colors.redLight, borderRadius: 10, padding: 12, marginBottom: 12 },
   button: {
-    borderRadius: 10,
+    borderRadius: 999,
     paddingVertical: 14,
-    paddingHorizontal: 16,
+    paddingHorizontal: 18,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1.5,

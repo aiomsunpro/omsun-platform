@@ -6,6 +6,8 @@ import { Button, Card, H2, ListItem, Muted, Row, Screen } from "@/components/ui"
 import { useAuth } from "@/lib/auth";
 import { OFFICE_PHONE } from "@/lib/config";
 import { dateIST } from "@/lib/format";
+import { TAB_BAR_SPACE } from "@/components/floating-tab-bar";
+import { TabHero } from "@/components/tab-hero";
 import { useI18n } from "@/lib/i18n";
 import { colors } from "@/lib/theme";
 
@@ -15,11 +17,19 @@ export default function Profile() {
   const place = [retailer?.village, retailer?.taluka, retailer?.district].filter(Boolean).join(", ");
 
   return (
-    <Screen>
-      <Card>
-        <Text style={{ fontSize: 18, fontWeight: "700" }}>{profile?.full_name}</Text>
-        <Muted>{profile?.email}</Muted>
-      </Card>
+    <Screen padded={false} edges={[]} bottomSpace={TAB_BAR_SPACE + 20}>
+      <TabHero title={t("profile")}>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: colors.yellow, alignItems: "center", justifyContent: "center", marginRight: 12 }}>
+            <Text style={{ fontSize: 24, fontWeight: "800", color: colors.text }}>{(profile?.full_name ?? "?").slice(0, 1).toUpperCase()}</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: colors.white, fontSize: 18, fontWeight: "800" }}>{profile?.full_name}</Text>
+            <Text style={{ color: colors.blueLight }}>{profile?.email}</Text>
+          </View>
+        </View>
+      </TabHero>
+      <View style={{ paddingHorizontal: 16 }}>
 
       <H2>{t("myShop")}</H2>
       <Card>
@@ -36,7 +46,7 @@ export default function Profile() {
         <LanguageSwitch />
       </View>
 
-      <View style={{ borderRadius: 12, overflow: "hidden", borderWidth: 1, borderColor: colors.border, marginVertical: 8 }}>
+      <View style={{ borderRadius: 20, overflow: "hidden", backgroundColor: colors.white, marginVertical: 8 }}>
         <ListItem title={t("myCustomers")} right={<Text style={{ color: colors.muted }}>›</Text>} onPress={() => router.push("/customers")} />
         <ListItem title={t("servicesAndPrices")} right={<Text style={{ color: colors.muted }}>›</Text>} onPress={() => router.push("/services")} />
         <ListItem title={t("notifications")} right={<Text style={{ color: colors.muted }}>›</Text>} onPress={() => router.push("/notifications")} />
@@ -49,6 +59,7 @@ export default function Profile() {
       <Muted style={{ textAlign: "center", marginTop: 8 }}>
         {t("appVersion")} {Constants.expoConfig?.version}
       </Muted>
+      </View>
     </Screen>
   );
 }

@@ -44,3 +44,15 @@ export const OPEN_STATUSES: RequestStatus[] = [
 ];
 
 export const FINAL_STATUSES: RequestStatus[] = ["completed", "rejected", "cancelled"];
+
+/** Soft card shadow (Android elevation + iOS/web shadow). */
+export const shadow = {
+  shadowColor: "#1E2A6B",
+  shadowOpacity: 0.12,
+  shadowRadius: 16,
+  shadowOffset: { width: 0, height: 6 },
+  elevation: 6,
+};
+
+/** Light tinted tile background used on the home grid. */
+export const tile = "#EEF0FA";

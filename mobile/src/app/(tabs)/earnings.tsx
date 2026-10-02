@@ -2,6 +2,8 @@ import { router } from "expo-router";
 import { RefreshControl, Text, View } from "react-native";
 import { Card, Empty, ErrorText, H2, ListItem, Muted, Pill, Row, Screen } from "@/components/ui";
 import { dateIST, rupees } from "@/lib/format";
+import { TAB_BAR_SPACE } from "@/components/floating-tab-bar";
+import { TabHero } from "@/components/tab-hero";
 import { useI18n, type StringKey } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase";
 import { colors } from "@/lib/theme";
@@ -48,16 +50,24 @@ export default function Earnings() {
   });
 
   return (
-    <Screen refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}>
+    <Screen
+      padded={false}
+      edges={[]}
+      bottomSpace={TAB_BAR_SPACE + 20}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
+    >
+      <TabHero title={t("earnings")}>
+        <Text style={{ color: colors.blueLight, fontWeight: "600" }}>{t("earned")}</Text>
+        <Text style={{ color: colors.white, fontSize: 36, fontWeight: "800" }}>{data ? rupees(data.earned) : "₹ –"}</Text>
+        <Text style={{ color: colors.blueLight, fontSize: 12 }}>{t("earnedHint")}</Text>
+      </TabHero>
+      <View style={{ paddingHorizontal: 16 }}>
       <ErrorText>{error}</ErrorText>
       <View style={{ flexDirection: "row", gap: 10 }}>
-        <Total label={t("earned")} hint={t("earnedHint")} value={data?.earned} fg={colors.green} />
         <Total label={t("onHold")} hint={t("onHoldHint")} value={data?.onHold} fg="#8A6100" />
-      </View>
-      <View style={{ flexDirection: "row", gap: 10 }}>
         <Total label={t("settled")} value={data?.settled} fg={colors.blue} />
-        <Total label={t("dueToOmsun")} hint={t("dueToOmsunHint")} value={data?.due} fg={colors.orange} />
       </View>
+      <Total label={t("dueToOmsun")} hint={t("dueToOmsunHint")} value={data?.due} fg={colors.orange} />
 
       {data?.settlements.length ? (
         <>
@@ -86,7 +96,7 @@ export default function Earnings() {
       ) : null}
 
       <H2>{t("commissionHistory")}</H2>
-      <View style={{ borderRadius: 12, overflow: "hidden", borderWidth: 1, borderColor: colors.border }}>
+      <View style={{ borderRadius: 20, overflow: "hidden", backgroundColor: colors.white }}>
         {data && data.list.length === 0 ? <Empty text={t("noCommissions")} /> : null}
         {data?.list.map((c) => {
           const st = COMMISSION_STYLE[c.status];
@@ -100,6 +110,7 @@ export default function Earnings() {
             />
           );
         })}
+      </View>
       </View>
     </Screen>
   );

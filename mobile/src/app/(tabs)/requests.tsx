@@ -1,12 +1,14 @@
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { FlatList, RefreshControl, ScrollView, TextInput, View } from "react-native";
-import { Button, Chip, Empty, ErrorText, ListItem, StatusBadge, styles } from "@/components/ui";
+import { TAB_BAR_SPACE } from "@/components/floating-tab-bar";
+import { RequestRow } from "@/components/request-row";
+import { TabHero } from "@/components/tab-hero";
+import { Chip, Empty, ErrorText, styles } from "@/components/ui";
 import { useAuth } from "@/lib/auth";
-import { dateIST, rupees } from "@/lib/format";
 import { useI18n, type StringKey } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase";
-import { colors, OPEN_STATUSES } from "@/lib/theme";
+import { colors, OPEN_STATUSES, shadow } from "@/lib/theme";
 import type { RequestStatus, ServiceRequest } from "@/lib/types";
 import { must, useLoad } from "@/lib/use-load";
 
@@ -20,7 +22,7 @@ const FILTERS: { key: Filter; label: StringKey; match: (s: RequestStatus) => boo
 ];
 
 export default function Requests() {
-  const { t, pick } = useI18n();
+  const { t } = useI18n();
   const { retailer } = useAuth();
   const params = useLocalSearchParams<{ filter?: Filter }>();
   const [filter, setFilter] = useState<Filter>(params.filter ?? "all");
@@ -69,38 +71,33 @@ export default function Requests() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <View style={{ padding: 12, paddingBottom: 4 }}>
+      <TabHero title={t("requests")}>
         <TextInput
           value={search}
           onChangeText={setSearch}
           placeholder={t("searchRequests")}
           placeholderTextColor={colors.muted}
-          style={[styles.input, { marginBottom: 10 }]}
+          style={[styles.input, { marginBottom: 12, borderRadius: 999, borderColor: colors.white }]}
         />
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 8 }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {FILTERS.map((f) => (
-            <Chip key={f.key} label={t(f.label)} active={filter === f.key} onPress={() => setFilter(f.key)} />
+            <Chip key={f.key} label={t(f.label)} active={filter === f.key} onPress={() => setFilter(f.key)} onDark />
           ))}
         </ScrollView>
-        <ErrorText>{error}</ErrorText>
-      </View>
+      </TabHero>
+      <ErrorText>{error}</ErrorText>
       <FlatList
         data={rows}
         keyExtractor={(r) => r.id}
+        contentContainerStyle={{ paddingBottom: TAB_BAR_SPACE + 20 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
         ListEmptyComponent={data ? <Empty text={data.length ? t("nothingHere") : t("noRequestsYet")} /> : null}
         renderItem={({ item: r }) => (
-          <ListItem
-            title={`${r.customers?.full_name ?? ""} · ${pick(r.services?.name_mr, r.services?.name_en)}`}
-            subtitle={`${r.request_number} · ${dateIST(r.submitted_at)} · ${rupees(r.customer_price)}`}
-            right={<StatusBadge status={r.status} />}
-            onPress={() => router.push(`/request/${r.id}`)}
-          />
+          <View style={{ marginHorizontal: 16, marginBottom: 10, backgroundColor: colors.white, borderRadius: 20, overflow: "hidden", ...shadow, shadowOpacity: 0.06, elevation: 2 }}>
+            <RequestRow r={r} showPrice />
+          </View>
         )}
       />
-      <View style={{ padding: 12 }}>
-        <Button title={`+  ${t("newRequest")}`} variant="yellow" onPress={() => router.push("/new-request")} />
-      </View>
     </View>
   );
 }
