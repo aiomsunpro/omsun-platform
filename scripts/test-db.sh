@@ -14,6 +14,6 @@ PSQL=(psql -h "$DIR" -p 5499 -U postgres -d postgres -q -v ON_ERROR_STOP=1)
 "${PSQL[@]}" -f tests/db/supabase-stub.sql 2>/dev/null
 for f in supabase/migrations/*.sql; do "${PSQL[@]}" -f "$f"; done
 "${PSQL[@]}" -f tests/db/supabase-grants.sql
-for t in tests/db/schema-test.sql tests/db/cash-book-test.sql tests/db/mitra-app-test.sql tests/db/website-enquiry-test.sql; do
+for t in tests/db/schema-test.sql tests/db/cash-book-test.sql tests/db/mitra-app-test.sql tests/db/website-enquiry-test.sql tests/db/office-records-test.sql; do
   "${PSQL[@]}" -f "$t" | grep -E 'FAIL|TESTS PASSED| f$'
 done

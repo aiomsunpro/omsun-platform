@@ -34,3 +34,27 @@ export async function submitEnquiry(form: FormData): Promise<EnquiryResult> {
     message: known ? MESSAGES[known] : "अर्ज पाठवता आला नाही. कृपया पुन्हा प्रयत्न करा किंवा आम्हाला कॉल करा.",
   };
 }
+
+export type TrackResult =
+  | { ok: true; requestNumber: string; serviceMr: string; serviceEn: string; status: string; submittedAt: string; updatedAt: string }
+  | { ok: false; message: string };
+
+/** Website status tracker: request number and the customer's mobile must both match. */
+export async function trackRequest(requestNumber: string, mobile: string): Promise<TrackResult> {
+  if (!requestNumber.trim()) return { ok: false, message: "कृपया अर्ज क्रमांक टाका (पावतीवर आहे)." };
+  if (mobile.replace(/\D/g, "").length < 10) return { ok: false, message: "कृपया 10 अंकी मोबाईल नंबर टाका." };
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("track_request", { p_request_number: requestNumber, p_mobile: mobile });
+  if (error) return { ok: false, message: "स्थिती तपासता आली नाही. कृपया पुन्हा प्रयत्न करा किंवा आम्हाला कॉल करा." };
+  const row = (data as { request_number: string; service_en: string; service_mr: string; status: string; submitted_at: string; updated_at: string }[] | null)?.[0];
+  if (!row) return { ok: false, message: "हा अर्ज क्रमांक आणि मोबाईल नंबर जुळत नाहीत. कृपया पावती तपासा." };
+  return {
+    ok: true,
+    requestNumber: row.request_number,
+    serviceMr: row.service_mr,
+    serviceEn: row.service_en,
+    status: row.status,
+    submittedAt: row.submitted_at,
+    updatedAt: row.updated_at,
+  };
+}

@@ -9,12 +9,15 @@ import {
   BadgeCheck,
   Bell,
   BellRing,
+  Building2,
   CalendarDays,
   ChartColumn,
   CircleHelp,
   CirclePlus,
   ClipboardList,
+  FileCheck,
   HandCoins,
+  KeyRound,
   Image as ImageIcon,
   LayoutDashboard,
   LogOut,
@@ -23,6 +26,7 @@ import {
   MessageCircle,
   Receipt,
   Settings,
+  Sparkles,
   Store,
   UserCog,
   Users,
@@ -50,6 +54,7 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
     items: [
       { href: "/admin/requests", label: "Service Requests", icon: ClipboardList, roles: ALL_STAFF },
       { href: "/admin/requests/new", label: "New Walk-in", icon: CirclePlus, roles: ["owner", "manager", "service_executive"] },
+      { href: "/admin/compliances", label: "Compliances", icon: FileCheck, roles: ["owner", "manager", "accountant", "service_executive"] },
       { href: "/admin/services", label: "Service Management", icon: Settings },
     ],
   },
@@ -80,6 +85,14 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
     items: [
       { href: "#whatsapp", label: "WhatsApp Campaigns", icon: MessageCircle, roles: SALES, soon: true },
       { href: "#designs", label: "Creative Designs", icon: ImageIcon, roles: SALES, soon: true },
+    ],
+  },
+  {
+    title: "Office",
+    items: [
+      { href: "/admin/credentials", label: "Credentials", icon: KeyRound, roles: ALL_STAFF },
+      { href: "/admin/banks", label: "Bank Accounts", icon: Building2, roles: MONEY },
+      { href: "/admin/housekeeping", label: "Housekeeping", icon: Sparkles, roles: ALL_STAFF },
     ],
   },
   {

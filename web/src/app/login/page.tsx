@@ -21,6 +21,9 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           <input name="password" type="password" required autoComplete="current-password" className={inputClass} />
         </Field>
       </ActionForm>
+      <p className="mt-3 text-sm">
+        <Link href="/forgot-password" className="font-medium text-blue-700 underline">Forgot password?</Link>
+      </p>
       <p className="mt-6 text-sm text-gray-600">
         New staff member? <Link href="/signup" className="font-medium text-blue-700 underline">Create an account</Link>
       </p>
