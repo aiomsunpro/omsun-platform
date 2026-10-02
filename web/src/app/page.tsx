@@ -1,21 +1,19 @@
-import Image from "next/image";
-import Link from "next/link";
+import type { Metadata } from "next";
+import Home from "@/components/site/home";
 
-// Placeholder home page. The full public website is a later stage.
-export default function Home() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-blue-800 px-6 text-center text-white">
-      <div className="rounded-2xl bg-white px-6 py-4 shadow-lg">
-        <Image src="/omsun-logo.png" alt="OMSUN E-Seva Kendra" width={822} height={323} priority className="h-24 w-auto" />
-      </div>
-      <h1 className="text-4xl font-bold">
-        OMSUN <span className="text-yellow-300">E-Services</span>
-      </h1>
-      <p className="text-lg text-blue-100">All Digital Services Under One Roof · Omerga, Maharashtra</p>
-      <p className="text-blue-100">सर्व डिजिटल सेवा एकाच छताखाली</p>
-      <Link href="/login" className="rounded-md bg-yellow-400 px-5 py-2.5 font-semibold text-blue-950 hover:bg-yellow-300">
-        Staff Login
-      </Link>
-    </main>
-  );
+const TITLE = "OMSUN E सेवा केंद्र - ग्रामीण डिजिटल सेवा फ्रँचायझी";
+const DESCRIPTION =
+  "OMSUN E सेवा केंद्र - बँकिंग, CSC, सेतू, आपले सरकार, RTO, तहसील व सरकारी योजना सेवा. आपल्या गावात फ्रँचायझी सुरू करा.";
+
+export const metadata: Metadata = {
+  title: TITLE,
+  description: DESCRIPTION,
+  authors: [{ name: "OMSUN E Sewa Kendra" }],
+  openGraph: { title: TITLE, description: DESCRIPTION, type: "website", images: ["/site/hero.jpg"] },
+  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION, images: ["/site/hero.jpg"] },
+};
+
+// Public website, moved here from the old Lovable project.
+export default function Page() {
+  return <Home />;
 }
