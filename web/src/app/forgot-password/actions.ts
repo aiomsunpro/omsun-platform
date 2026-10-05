@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionState } from "@/lib/types";
 
@@ -11,9 +12,14 @@ export async function requestPasswordReset(_: ActionState, formData: FormData): 
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host");
   const proto = h.get("x-forwarded-proto") ?? (host?.startsWith("localhost") ? "http" : "https");
-  const supabase = await createClient();
+  // Implicit flow: the link carries its own one-time session, so it works on any
+  // phone or browser and doesn't depend on a cookie from the browser that asked.
+  // The page it opens saves that session (see AuthLinkHandler).
+  const supabase = createSupabaseClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+    auth: { flowType: "implicit", persistSession: false, autoRefreshToken: false },
+  });
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${proto}://${host}/auth/confirm?next=/reset-password`,
+    redirectTo: `${proto}://${host}/reset-password`,
   });
   // Same answer whether or not the email has an account, so nobody can check who works here.
   if (error && !/not found|rate/i.test(error.message)) return { error: error.message };

@@ -9,6 +9,11 @@ import { useEffect } from "react";
 export function AuthLinkHandler() {
   useEffect(() => {
     const hash = new URLSearchParams(window.location.hash.slice(1));
+    // An expired or already-used link comes back as #error=…
+    if (hash.get("error_code") || hash.get("error")) {
+      window.location.replace("/forgot-password?error=link");
+      return;
+    }
     const access_token = hash.get("access_token");
     const refresh_token = hash.get("refresh_token");
     if (!access_token || !refresh_token) return;
