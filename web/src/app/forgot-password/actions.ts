@@ -30,5 +30,11 @@ export async function setNewPassword(_: ActionState, formData: FormData): Promis
   if (!data.user) return { error: "This reset link has expired. Ask for a new one." };
   const { error } = await supabase.auth.updateUser({ password });
   if (error) return { error: error.message };
+  // Retailers reset from the OMSUN Mitra app; they log in there, not in the admin app.
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", data.user.id).maybeSingle();
+  if (profile?.role === "retailer" || profile?.role === "customer") {
+    await supabase.auth.signOut();
+    return { ok: "Password changed. Open the OMSUN Mitra app and log in with your new password. / पासवर्ड बदलला, आता ॲपमध्ये लॉग इन करा." };
+  }
   redirect("/admin");
 }

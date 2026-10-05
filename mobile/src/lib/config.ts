@@ -13,3 +13,4 @@ export const OFFICE_PHONE = process.env.EXPO_PUBLIC_OFFICE_PHONE ?? "";
 
 /** Public pages the app links to (Play Store requires both). */
 export const PRIVACY_URL = "https://omsunesewakendra.com/privacy";
+export const RESET_URL = "https://omsunesewakendra.com/auth/confirm?next=/reset-password";
