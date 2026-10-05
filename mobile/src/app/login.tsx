@@ -5,6 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, ErrorText, Field, Muted, styles } from "@/components/ui";
 import { LanguageSwitch } from "@/components/language-switch";
 import { notify } from "@/lib/documents";
+import { RESET_URL } from "@/lib/config";
 import { useI18n } from "@/lib/i18n";
 import { errorText, supabase } from "@/lib/supabase";
 import { colors } from "@/lib/theme";
@@ -29,8 +30,9 @@ export default function Login() {
   async function forgot() {
     setError(null);
     if (!email.trim()) return setError(t("enterEmailFirst"));
-    const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
-    if (error) return setError(errorText(error));
+    // The link opens the website's reset page, which works on any phone or browser.
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: RESET_URL });
+    if (error) return setError(/rate limit/i.test(error.message) ? t("tooManyEmails") : errorText(error));
     notify(t("resetSent"));
   }
 

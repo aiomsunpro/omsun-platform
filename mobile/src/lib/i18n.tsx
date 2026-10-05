@@ -27,6 +27,7 @@ const en = {
   forgotPassword: "Forgot Password?",
   resetSent: "We emailed you a link to set a new password.",
   enterEmailFirst: "Enter your email first.",
+  tooManyEmails: "Too many emails were sent. Please wait an hour and try again, or call the OMSUN office.",
 
   // shop registration
   shopDetails: "Shop Details",
@@ -231,6 +232,7 @@ const mr: Record<StringKey, string> = {
   forgotPassword: "पासवर्ड विसरलात?",
   resetSent: "नवीन पासवर्ड सेट करण्याची लिंक तुमच्या ईमेलवर पाठवली आहे.",
   enterEmailFirst: "आधी तुमचा ईमेल टाका.",
+  tooManyEmails: "खूप ईमेल पाठवले गेले. कृपया एक तासाने पुन्हा प्रयत्न करा किंवा ओमसन ऑफिसला फोन करा.",
 
   shopDetails: "दुकानाची माहिती",
   shopDetailsIntro: "तुमच्या दुकानाची माहिती भरा. ओमसन टीम ती तपासून तुमचे खाते मंजूर करेल.",
