@@ -3,6 +3,17 @@ import { NextResponse, type NextRequest } from "next/server";
 
 // Refreshes the Supabase session cookie and keeps signed-out visitors out of /admin.
 export async function proxy(request: NextRequest) {
+  // Email links that Supabase sent to the bare site address (its fallback when the
+  // link's own return address isn't on the allowed list) finish signing in here.
+  const code = request.nextUrl.searchParams.get("code");
+  if (code && request.nextUrl.pathname === "/") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/auth/confirm";
+    url.search = "";
+    url.searchParams.set("code", code);
+    return NextResponse.redirect(url);
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
