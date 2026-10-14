@@ -3,16 +3,17 @@ import { requireStaff } from "@/lib/auth";
 import type { Service, ServiceCategory } from "@/lib/types";
 import { ActionForm } from "@/components/action-form";
 import { Card, Field, inputClass, PageTitle } from "@/components/ui";
-import { addRequiredDocument, removeRequiredDocument, updateService } from "../actions";
+import { addQuestion, addRequiredDocument, removeQuestion, removeRequiredDocument, updateService } from "../actions";
 import { ServiceFields } from "../service-form";
 
 export default async function EditService({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const { supabase, profile } = await requireStaff(["owner", "manager"]);
-  const [{ data: service }, { data: categories }, { data: docs }] = await Promise.all([
+  const [{ data: service }, { data: categories }, { data: docs }, { data: questions }] = await Promise.all([
     supabase.from("services").select("*").eq("id", id).maybeSingle<Service>(),
     supabase.from("service_categories").select("*").order("sort_order").returns<ServiceCategory[]>(),
     supabase.from("service_required_documents").select("*").eq("service_id", id).order("sort_order"),
+    supabase.from("service_questions").select("*").eq("service_id", id).order("sort_order"),
   ]);
   if (!service) notFound();
 
@@ -28,6 +29,7 @@ export default async function EditService({ params }: { params: Promise<{ id: st
             </ActionForm>
           </Card>
         </div>
+        <div className="space-y-6">
         <Card title="Documents the customer must give">
           <ul className="mb-4 divide-y divide-gray-100 text-sm">
             {docs?.map((d) => (
@@ -58,6 +60,40 @@ export default async function EditService({ params }: { params: Promise<{ id: st
             <input type="hidden" name="sort_order" value={(docs?.length ?? 0) + 1} />
           </ActionForm>
         </Card>
+        <Card title="Questions the customer must answer">
+          <p className="mb-3 text-sm text-gray-600">
+            Details typed in as text, like father&apos;s name, date of birth or an old certificate number.
+          </p>
+          <ul className="mb-4 divide-y divide-gray-100 text-sm">
+            {questions?.map((q) => (
+              <li key={q.id} className="flex items-center justify-between gap-2 py-2">
+                <span>
+                  {q.question_en} · {q.question_mr}
+                  {!q.is_mandatory && <span className="text-xs text-gray-500"> (optional)</span>}
+                </span>
+                <ActionForm action={removeQuestion} submitLabel="Remove" variant="danger" className="">
+                  <input type="hidden" name="service_id" value={service.id} />
+                  <input type="hidden" name="question_id" value={q.id} />
+                </ActionForm>
+              </li>
+            ))}
+            {(!questions || questions.length === 0) && <li className="py-2 text-gray-500">None listed yet.</li>}
+          </ul>
+          <ActionForm action={addQuestion} submitLabel="Add question">
+            <input type="hidden" name="service_id" value={service.id} />
+            <Field label="Question (English)">
+              <input name="question_en" required maxLength={200} placeholder="Father's full name" className={inputClass} />
+            </Field>
+            <Field label="प्रश्न (मराठी)">
+              <input name="question_mr" required maxLength={200} placeholder="वडिलांचे पूर्ण नाव" className={inputClass} />
+            </Field>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" name="is_mandatory" defaultChecked /> Required
+            </label>
+            <input type="hidden" name="sort_order" value={(questions?.length ?? 0) + 1} />
+          </ActionForm>
+        </Card>
+        </div>
       </div>
     </>
   );

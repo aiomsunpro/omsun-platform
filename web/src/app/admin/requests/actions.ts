@@ -154,3 +154,19 @@ export async function recordPayment(_: ActionState, f: FormData): Promise<Action
   revalidatePath(`/admin/requests/${id}`);
   return { ok: `Recorded. Receipt ${data.receipt_number}.` };
 }
+
+// One text box per service question, named answer_<question id>. Blank boxes
+// are skipped, so an answer is never wiped by mistake.
+export async function saveAnswers(_: ActionState, f: FormData): Promise<ActionState> {
+  const { supabase } = await requireStaff(["owner", "manager", "service_executive"]);
+  const id = s(f, "id");
+  const rows = [...f.keys()]
+    .filter((k) => k.startsWith("answer_"))
+    .map((k) => ({ request_id: id, question_id: k.slice(7), question_en: "", question_mr: "", answer: s(f, k) }))
+    .filter((r) => r.answer);
+  if (rows.length === 0) return { error: "Type at least one answer." };
+  const { error } = await supabase.from("request_answers").upsert(rows, { onConflict: "request_id,question_id" });
+  if (error) return { error: error.message };
+  revalidatePath(`/admin/requests/${id}`);
+  return { ok: "Answers saved." };
+}

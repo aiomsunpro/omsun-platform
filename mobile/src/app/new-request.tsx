@@ -23,6 +23,8 @@ export default function NewRequest() {
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [serviceId, setServiceId] = useState<string | null>(params.service ?? null);
   const [files, setFiles] = useState<Record<string, PickedFile[]>>({});
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [answerErrors, setAnswerErrors] = useState<Record<string, string>>({});
   const [remarks, setRemarks] = useState("");
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState<string | null>(null);
@@ -44,6 +46,22 @@ export default function NewRequest() {
     [catalogue.data, serviceId],
   );
   const missing = requiredDocs.filter((d) => d.is_mandatory && !(files[d.id]?.length));
+  const questions = useMemo(
+    () => (catalogue.data?.questions ?? []).filter((q) => q.service_id === serviceId),
+    [catalogue.data, serviceId],
+  );
+  const answered = questions.filter((q) => answers[q.id]?.trim());
+
+  // Required questions must be answered before moving past the documents step.
+  function next() {
+    if (step === 2) {
+      const e: Record<string, string> = {};
+      for (const q of questions) if (q.is_mandatory && !answers[q.id]?.trim()) e[q.id] = t("required");
+      setAnswerErrors(e);
+      if (Object.keys(e).length) return;
+    }
+    setStep(step + 1);
+  }
 
   const canNext = (step === 0 && !!customer) || (step === 1 && !!service) || step === 2;
 
@@ -72,6 +90,21 @@ export default function NewRequest() {
       return setError(errorText(error));
     }
 
+    let detailsFailed = false;
+    if (answered.length) {
+      setProgress(t("submitting"));
+      const { error: ansErr } = await supabase.from("request_answers").insert(
+        answered.map((q) => ({
+          request_id: data.id,
+          question_id: q.id,
+          question_en: q.question_en,
+          question_mr: q.question_mr,
+          answer: answers[q.id].trim(),
+        })),
+      );
+      detailsFailed = !!ansErr;
+    }
+
     // Upload documents after the request exists, since files are stored under its id.
     const all = Object.entries(files).flatMap(([slot, list]) => list.map((f) => ({ slot, f })));
     let failed = 0;
@@ -87,7 +120,8 @@ export default function NewRequest() {
     }
     setBusy(false);
     setProgress(null);
-    notify(`${t("requestSent")}: ${data.request_number}`, failed ? t("someUploadsFailed") : undefined);
+    const problems = [failed ? t("someUploadsFailed") : null, detailsFailed ? t("detailsNotSaved") : null].filter(Boolean);
+    notify(`${t("requestSent")}: ${data.request_number}`, problems.length ? problems.join("\n\n") : undefined);
     router.replace(`/request/${data.id}`);
   }
 
@@ -123,7 +157,11 @@ export default function NewRequest() {
               catalogue={catalogue.data}
               selectedId={serviceId}
               onSelect={(id) => {
-                if (id !== serviceId) setFiles({});
+                if (id !== serviceId) {
+                  setFiles({});
+                  setAnswers({});
+                  setAnswerErrors({});
+                }
                 setServiceId(id);
               }}
             />
@@ -132,6 +170,22 @@ export default function NewRequest() {
 
         {step === 2 && service ? (
           <>
+            {questions.length ? (
+              <>
+                <H2>{t("customerDetails")}</H2>
+                <Muted style={{ marginBottom: 10 }}>{t("customerDetailsHint")}</Muted>
+                {questions.map((q) => (
+                  <Field
+                    key={q.id}
+                    label={`${pick(q.question_mr, q.question_en)}${q.is_mandatory ? " *" : ` (${t("optional")})`}`}
+                    value={answers[q.id] ?? ""}
+                    onChangeText={(v) => setAnswers((p) => ({ ...p, [q.id]: v }))}
+                    error={answerErrors[q.id]}
+                    maxLength={2000}
+                  />
+                ))}
+              </>
+            ) : null}
             <H2>{t("requiredDocuments")}</H2>
             {requiredDocs.map((d) => (
               <DocSlot
@@ -158,6 +212,9 @@ export default function NewRequest() {
             <Card>
               <Row label={t("customer")} value={`${customer.full_name}${customer.mobile ? ` · ${customer.mobile}` : ""}`} />
               <Row label={t("service")} value={pick(service.name_mr, service.name_en)} />
+              {answered.map((q) => (
+                <Row key={q.id} label={pick(q.question_mr, q.question_en)} value={answers[q.id].trim()} />
+              ))}
               <Row
                 label={t("documents")}
                 value={String(Object.values(files).reduce((n, l) => n + l.length, 0))}
@@ -191,7 +248,7 @@ export default function NewRequest() {
         ) : null}
         <View style={{ flex: 2 }}>
           {step < 3 ? (
-            step > 0 || customer ? <Button title={t("next")} onPress={() => setStep(step + 1)} disabled={!canNext} /> : null
+            step > 0 || customer ? <Button title={t("next")} onPress={next} disabled={!canNext} /> : null
           ) : (
             <Button title={progress ?? t("submitRequest")} variant="yellow" onPress={submit} loading={busy && !progress} disabled={busy} />
           )}
