@@ -60,7 +60,12 @@ export default function NewRequest() {
       const e: Record<string, string> = {};
       for (const q of questions) if (q.is_mandatory && !answers[q.id]?.trim()) e[q.id] = t("required");
       setAnswerErrors(e);
-      if (Object.keys(e).length) return;
+      const unanswered = questions.filter((q) => e[q.id]);
+      if (unanswered.length) {
+        // The questions sit above the documents, often off screen, so say why Next did nothing.
+        notify(t("answerRequiredTitle"), unanswered.map((q) => `• ${pick(q.question_mr, q.question_en)}`).join("\n"));
+        return;
+      }
     }
     setStep(step + 1);
   }
@@ -134,7 +139,8 @@ export default function NewRequest() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <StepBar step={step} />
-      <Screen edges={[]}>
+      {/* key={step} starts each step at the top instead of where the last step was scrolled to. */}
+      <Screen key={step} edges={[]}>
         <ErrorText>{error}</ErrorText>
         {step === 0 ? (
           <CustomerStep
