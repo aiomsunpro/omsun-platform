@@ -2,6 +2,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
 import type { BottomTabBarProps } from "expo-router/js-tabs";
 import { Pressable, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useI18n } from "@/lib/i18n";
 import { colors, shadow } from "@/lib/theme";
 
@@ -17,8 +18,10 @@ const ICONS: Record<string, [IconName, IconName]> = {
 /**
  * PhonePe-style floating bar: two tabs, a big "New Request" pill in the middle, two tabs.
  */
-export function FloatingTabBar({ state, descriptors, navigation, insets }: BottomTabBarProps) {
+export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const { t } = useI18n();
+  // Read the insets directly so the bar always sits above Android's system navigation bar.
+  const insets = useSafeAreaInsets();
 
   const tab = (index: number) => {
     const route = state.routes[index];
@@ -46,7 +49,7 @@ export function FloatingTabBar({ state, descriptors, navigation, insets }: Botto
   };
 
   return (
-    <View style={{ position: "absolute", left: 12, right: 12, bottom: Math.max(insets.bottom, 10) }}>
+    <View style={{ position: "absolute", left: 12, right: 12, bottom: insets.bottom + 10 }}>
       <View
         style={{
           flexDirection: "row",
@@ -92,3 +95,8 @@ export function FloatingTabBar({ state, descriptors, navigation, insets }: Botto
 
 /** Space to leave at the bottom of tab screens so content clears the floating bar. */
 export const TAB_BAR_SPACE = 110;
+
+/** TAB_BAR_SPACE plus the system navigation bar, so the last item scrolls clear of both. */
+export function useTabBarSpace() {
+  return TAB_BAR_SPACE + useSafeAreaInsets().bottom;
+}

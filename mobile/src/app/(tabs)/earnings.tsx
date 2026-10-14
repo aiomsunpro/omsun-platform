@@ -2,7 +2,7 @@ import { router } from "expo-router";
 import { RefreshControl, Text, View } from "react-native";
 import { Card, Empty, ErrorText, H2, ListItem, Muted, Pill, Row, Screen } from "@/components/ui";
 import { dateIST, rupees } from "@/lib/format";
-import { TAB_BAR_SPACE } from "@/components/floating-tab-bar";
+import { useTabBarSpace } from "@/components/floating-tab-bar";
 import { TabHero } from "@/components/tab-hero";
 import { useI18n, type StringKey } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase";
@@ -18,6 +18,7 @@ const COMMISSION_STYLE: Record<Commission["status"], { label: StringKey; fg: str
 };
 
 export default function Earnings() {
+  const tabBarSpace = useTabBarSpace();
   const { t } = useI18n();
 
   const { data, error, refreshing, refresh } = useLoad(async () => {
@@ -53,7 +54,7 @@ export default function Earnings() {
     <Screen
       padded={false}
       edges={[]}
-      bottomSpace={TAB_BAR_SPACE + 20}
+      bottomSpace={tabBarSpace + 20}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
     >
       <TabHero title={t("earnings")}>

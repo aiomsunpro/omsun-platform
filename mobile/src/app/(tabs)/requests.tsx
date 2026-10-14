@@ -1,7 +1,7 @@
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { FlatList, RefreshControl, ScrollView, TextInput, View } from "react-native";
-import { TAB_BAR_SPACE } from "@/components/floating-tab-bar";
+import { useTabBarSpace } from "@/components/floating-tab-bar";
 import { RequestRow } from "@/components/request-row";
 import { TabHero } from "@/components/tab-hero";
 import { Chip, Empty, ErrorText, styles } from "@/components/ui";
@@ -22,6 +22,7 @@ const FILTERS: { key: Filter; label: StringKey; match: (s: RequestStatus) => boo
 ];
 
 export default function Requests() {
+  const tabBarSpace = useTabBarSpace();
   const { t } = useI18n();
   const { retailer } = useAuth();
   const params = useLocalSearchParams<{ filter?: Filter }>();
@@ -89,7 +90,7 @@ export default function Requests() {
       <FlatList
         data={rows}
         keyExtractor={(r) => r.id}
-        contentContainerStyle={{ paddingBottom: TAB_BAR_SPACE + 20 }}
+        contentContainerStyle={{ paddingBottom: tabBarSpace + 20 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
         ListEmptyComponent={data ? <Empty text={data.length ? t("nothingHere") : t("noRequestsYet")} /> : null}
         renderItem={({ item: r }) => (
