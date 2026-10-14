@@ -1,4 +1,5 @@
 import Constants from "expo-constants";
+import * as Updates from "expo-updates";
 import { router } from "expo-router";
 import { Linking, Text, View } from "react-native";
 import { LanguageSwitch } from "@/components/language-switch";
@@ -73,7 +74,7 @@ export default function Profile() {
       <Button title={t("logOut")} variant="danger" onPress={signOut} />
       <Button title={t("deleteAccount")} variant="secondary" onPress={requestDeletion} />
       <Muted style={{ textAlign: "center", marginTop: 8 }}>
-        {t("appVersion")} {Constants.expoConfig?.version}
+        {t("appVersion")} {Constants.expoConfig?.version} · {Updates.updateId ? Updates.updateId.slice(0, 8) : "built-in"}
       </Muted>
       </View>
     </Screen>
