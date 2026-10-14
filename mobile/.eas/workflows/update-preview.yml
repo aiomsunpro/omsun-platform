@@ -1,0 +1,12 @@
+name: Publish preview update
+
+# Run by hand (eas workflow:run or the Expo connector) to send JS-only changes
+# to installed preview APKs over the air.
+jobs:
+  publish_android_update:
+    name: Publish Android update
+    type: update
+    params:
+      branch: preview
+      platform: android
+      message: ${{ github.sha }}
