@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { FlatList, Linking, Pressable, RefreshControl, Text, TextInput, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Empty, ErrorText, ListItem, styles } from "@/components/ui";
 import { useI18n } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase";
@@ -25,7 +26,7 @@ export default function Customers() {
   }, [data, search]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.bg }}>
+    <SafeAreaView edges={["bottom"]} style={{ flex: 1, backgroundColor: colors.bg }}>
       <View style={{ padding: 12 }}>
         <TextInput
           value={search}
@@ -55,6 +56,6 @@ export default function Customers() {
           />
         )}
       />
-    </View>
+    </SafeAreaView>
   );
 }

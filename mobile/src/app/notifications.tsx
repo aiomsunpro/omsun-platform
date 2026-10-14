@@ -1,5 +1,6 @@
 import { router } from "expo-router";
 import { FlatList, RefreshControl, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Empty, ErrorText, ListItem } from "@/components/ui";
 import { dateIST } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
@@ -39,7 +40,7 @@ export default function Notifications() {
   const unread = (data ?? []).some((n) => !n.is_read);
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.bg }}>
+    <SafeAreaView edges={["bottom"]} style={{ flex: 1, backgroundColor: colors.bg }}>
       <ErrorText>{error}</ErrorText>
       <FlatList
         data={data ?? []}
@@ -59,6 +60,6 @@ export default function Notifications() {
           <Button title={t("markAllRead")} variant="secondary" onPress={markAll} />
         </View>
       ) : null}
-    </View>
+    </SafeAreaView>
   );
 }
