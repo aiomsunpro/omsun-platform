@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from "expo-router";
-import { useMemo, useState } from "react";
-import { Text, TextInput, View } from "react-native";
+import { useEffect, useMemo, useState } from "react";
+import { Keyboard, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { DocSlot } from "@/components/doc-picker";
 import { ServiceCard } from "@/components/service-card";
@@ -19,6 +19,17 @@ const OTHER = "other";
 
 export default function NewRequest() {
   const insets = useSafeAreaInsets();
+  // Android draws edge to edge, so the keyboard covers the footer instead of pushing it up.
+  // Lift the Back / Next buttons above the keyboard while it is open.
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  useEffect(() => {
+    const show = Keyboard.addListener("keyboardDidShow", (e) => setKeyboardHeight(e.endCoordinates.height));
+    const hide = Keyboard.addListener("keyboardDidHide", () => setKeyboardHeight(0));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
   const { t, pick } = useI18n();
   const params = useLocalSearchParams<{ service?: string }>();
   const [step, setStep] = useState(0);
@@ -67,6 +78,7 @@ export default function NewRequest() {
         return;
       }
     }
+    Keyboard.dismiss();
     setStep(step + 1);
   }
 
@@ -248,7 +260,7 @@ export default function NewRequest() {
         ) : null}
       </Screen>
 
-      <View style={{ flexDirection: "row", gap: 10, padding: 12, paddingBottom: 12 + insets.bottom, backgroundColor: colors.white, borderTopWidth: 1, borderTopColor: colors.border }}>
+      <View style={{ flexDirection: "row", gap: 10, padding: 12, paddingBottom: 12 + Math.max(insets.bottom, keyboardHeight), backgroundColor: colors.white, borderTopWidth: 1, borderTopColor: colors.border }}>
         {step > 0 ? (
           <View style={{ flex: 1 }}>
             <Button title={t("back")} variant="secondary" onPress={() => setStep(step - 1)} disabled={busy} />
