@@ -1,6 +1,7 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { useMemo, useState } from "react";
 import { Text, TextInput, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { DocSlot } from "@/components/doc-picker";
 import { ServiceCard } from "@/components/service-card";
 import { Button, Card, Empty, ErrorText, Field, H2, ListItem, Loading, Muted, Row, Screen, styles } from "@/components/ui";
@@ -17,6 +18,7 @@ const STEPS: StringKey[] = ["customer", "service", "documents", "review"];
 const OTHER = "other";
 
 export default function NewRequest() {
+  const insets = useSafeAreaInsets();
   const { t, pick } = useI18n();
   const params = useLocalSearchParams<{ service?: string }>();
   const [step, setStep] = useState(0);
@@ -240,7 +242,7 @@ export default function NewRequest() {
         ) : null}
       </Screen>
 
-      <View style={{ flexDirection: "row", gap: 10, padding: 12, backgroundColor: colors.white, borderTopWidth: 1, borderTopColor: colors.border }}>
+      <View style={{ flexDirection: "row", gap: 10, padding: 12, paddingBottom: 12 + insets.bottom, backgroundColor: colors.white, borderTopWidth: 1, borderTopColor: colors.border }}>
         {step > 0 ? (
           <View style={{ flex: 1 }}>
             <Button title={t("back")} variant="secondary" onPress={() => setStep(step - 1)} disabled={busy} />

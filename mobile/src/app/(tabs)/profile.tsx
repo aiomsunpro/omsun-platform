@@ -8,12 +8,13 @@ import { OFFICE_PHONE, PRIVACY_URL } from "@/lib/config";
 import { confirm, notify } from "@/lib/documents";
 import { supabase } from "@/lib/supabase";
 import { dateIST } from "@/lib/format";
-import { TAB_BAR_SPACE } from "@/components/floating-tab-bar";
+import { useTabBarSpace } from "@/components/floating-tab-bar";
 import { TabHero } from "@/components/tab-hero";
 import { useI18n } from "@/lib/i18n";
 import { colors } from "@/lib/theme";
 
 export default function Profile() {
+  const tabBarSpace = useTabBarSpace();
   const { t } = useI18n();
   const { profile, retailer, signOut } = useAuth();
   const requestDeletion = async () => {
@@ -30,7 +31,7 @@ export default function Profile() {
   const place = [retailer?.village, retailer?.taluka, retailer?.district].filter(Boolean).join(", ");
 
   return (
-    <Screen padded={false} edges={[]} bottomSpace={TAB_BAR_SPACE + 20}>
+    <Screen padded={false} edges={[]} bottomSpace={tabBarSpace + 20}>
       <TabHero title={t("profile")}>
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: colors.yellow, alignItems: "center", justifyContent: "center", marginRight: 12 }}>
