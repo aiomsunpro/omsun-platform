@@ -81,6 +81,30 @@ export async function removeRequiredDocument(_: ActionState, f: FormData): Promi
   return { ok: "Removed." };
 }
 
+export async function addQuestion(_: ActionState, f: FormData): Promise<ActionState> {
+  const { supabase } = await requireStaff(["owner", "manager"]);
+  const id = s(f, "service_id");
+  const { error } = await supabase.from("service_questions").insert({
+    service_id: id,
+    question_en: s(f, "question_en"),
+    question_mr: s(f, "question_mr") || s(f, "question_en"),
+    is_mandatory: f.get("is_mandatory") === "on",
+    sort_order: n(f, "sort_order"),
+  });
+  if (error) return { error: error.message };
+  revalidatePath(`/admin/services/${id}`);
+  return { ok: "Added." };
+}
+
+export async function removeQuestion(_: ActionState, f: FormData): Promise<ActionState> {
+  const { supabase } = await requireStaff(["owner", "manager"]);
+  const id = s(f, "service_id");
+  const { error } = await supabase.from("service_questions").delete().eq("id", s(f, "question_id"));
+  if (error) return { error: error.message };
+  revalidatePath(`/admin/services/${id}`);
+  return { ok: "Removed." };
+}
+
 // Paste many services at once, one per line, comma or tab separated (a copy
 // from Excel works): Category, Name (English), Name (Marathi), Govt fee,
 // Service charge, Commission, Days. New categories are created on the way.

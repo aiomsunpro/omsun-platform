@@ -4,7 +4,7 @@ import { dateIST, NEXT_STATUSES, rupees, STATUS_LABEL } from "@/lib/format";
 import type { Payment, RequestDocument, RequestStatus, ServiceRequest } from "@/lib/types";
 import { ActionForm } from "@/components/action-form";
 import { Card, Field, inputClass, PageTitle, StatusBadge } from "@/components/ui";
-import { assignRequest, changeStatus, recordPayment, uploadDocument, verifyDocument } from "../actions";
+import { assignRequest, changeStatus, recordPayment, saveAnswers, uploadDocument, verifyDocument } from "../actions";
 
 type Detail = ServiceRequest & {
   customers: { full_name: string; mobile: string | null; village: string | null; taluka: string | null } | null;
@@ -35,7 +35,7 @@ export default async function RequestDetail({ params }: { params: Promise<{ id: 
     .maybeSingle<Detail>();
   if (!r) notFound();
 
-  const [{ data: docs }, { data: history }, { data: payments }, { data: requiredDocs }] = await Promise.all([
+  const [{ data: docs }, { data: history }, { data: payments }, { data: requiredDocs }, { data: questions }, { data: answers }] = await Promise.all([
     supabase.from("request_documents").select("*").eq("request_id", id).order("created_at").returns<RequestDocument[]>(),
     supabase
       .from("request_status_history")
@@ -45,7 +45,12 @@ export default async function RequestDetail({ params }: { params: Promise<{ id: 
       .returns<History[]>(),
     supabase.from("payments").select("*").eq("request_id", id).order("created_at").returns<Payment[]>(),
     supabase.from("service_required_documents").select("name_en, is_mandatory").eq("service_id", r.service_id).order("sort_order"),
+    supabase.from("service_questions").select("id, question_en, is_mandatory").eq("service_id", r.service_id).order("sort_order"),
+    supabase.from("request_answers").select("id, question_id, question_en, answer").eq("request_id", id).order("created_at"),
   ]);
+  const answerFor = new Map((answers ?? []).filter((a) => a.question_id).map((a) => [a.question_id as string, a.answer as string]));
+  // answers to questions the service no longer asks
+  const oldAnswers = (answers ?? []).filter((a) => !a.question_id || !questions?.some((q) => q.id === a.question_id));
 
   const links = new Map<string, string>();
   for (const d of docs ?? []) {
@@ -96,6 +101,38 @@ export default async function RequestDetail({ params }: { params: Promise<{ id: 
               {r.remarks && <Item label="Remarks">{r.remarks}</Item>}
             </dl>
           </Card>
+
+          {((questions?.length ?? 0) > 0 || oldAnswers.length > 0) && (
+            <Card title="Answers">
+              {isWorker && !["completed", "rejected", "cancelled"].includes(r.status) && (questions?.length ?? 0) > 0 ? (
+                <ActionForm action={saveAnswers} submitLabel="Save answers">
+                  <input type="hidden" name="id" value={r.id} />
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {questions!.map((q) => (
+                      <Field key={q.id} label={`${q.question_en}${q.is_mandatory ? " *" : ""}`}>
+                        <input name={`answer_${q.id}`} maxLength={2000} defaultValue={answerFor.get(q.id) ?? ""} className={inputClass} />
+                      </Field>
+                    ))}
+                  </div>
+                </ActionForm>
+              ) : (
+                <dl className="grid grid-cols-1 gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
+                  {questions?.map((q) => (
+                    <Item key={q.id} label={q.question_en}>
+                      {answerFor.get(q.id) ?? <span className="text-gray-500">{q.is_mandatory ? "Not answered" : "—"}</span>}
+                    </Item>
+                  ))}
+                </dl>
+              )}
+              {oldAnswers.length > 0 && (
+                <dl className="mt-4 grid grid-cols-1 gap-x-6 gap-y-3 border-t border-gray-100 pt-4 text-sm sm:grid-cols-2">
+                  {oldAnswers.map((a) => (
+                    <Item key={a.id} label={a.question_en}>{a.answer}</Item>
+                  ))}
+                </dl>
+              )}
+            </Card>
+          )}
 
           <Card title="Documents">
             {requiredDocs && requiredDocs.length > 0 && (

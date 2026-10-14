@@ -75,6 +75,23 @@ export type RequiredDocument = {
   sort_order: number;
 };
 
+export type ServiceQuestion = {
+  id: string;
+  service_id: string;
+  question_en: string;
+  question_mr: string;
+  is_mandatory: boolean;
+  sort_order: number;
+};
+
+export type RequestAnswer = {
+  id: string;
+  question_id: string | null;
+  question_en: string;
+  question_mr: string;
+  answer: string;
+};
+
 export type Customer = {
   id: string;
   full_name: string;

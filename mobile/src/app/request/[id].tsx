@@ -8,7 +8,7 @@ import { dateIST, rupees } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 import { errorText, supabase } from "@/lib/supabase";
 import { colors, FINAL_STATUSES } from "@/lib/theme";
-import type { RequestDocument, RequiredDocument, ServiceRequest, StatusHistory } from "@/lib/types";
+import type { RequestAnswer, RequestDocument, RequiredDocument, ServiceQuestion, ServiceRequest, StatusHistory } from "@/lib/types";
 import { must, useLoad } from "@/lib/use-load";
 
 const OTHER = "other";
@@ -23,6 +23,8 @@ export default function RequestDetail() {
   const [cancelNote, setCancelNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [edits, setEdits] = useState<Record<string, string>>({});
+  const [savingAnswers, setSavingAnswers] = useState(false);
 
   const { data, error, refreshing, refresh, reload } = useLoad(async () => {
     const req = must(
@@ -32,7 +34,7 @@ export default function RequestDetail() {
         .eq("id", id)
         .single(),
     ) as unknown as ServiceRequest;
-    const [history, docs, required] = await Promise.all([
+    const [history, docs, required, questions, answers] = await Promise.all([
       supabase.from("request_status_history").select("id, from_status, to_status, note, created_at").eq("request_id", id).order("created_at"),
       supabase
         .from("request_documents")
@@ -40,12 +42,17 @@ export default function RequestDetail() {
         .eq("request_id", id)
         .order("created_at"),
       supabase.from("service_required_documents").select("*").eq("service_id", req.service_id).order("sort_order"),
+      supabase.from("service_questions").select("*").eq("service_id", req.service_id).order("sort_order"),
+      supabase.from("request_answers").select("id, question_id, question_en, question_mr, answer").eq("request_id", id).order("created_at"),
     ]);
     return {
       req,
       history: must(history) as StatusHistory[],
       docs: must(docs) as RequestDocument[],
       required: must(required) as RequiredDocument[],
+      // Older databases without questions still show the request.
+      questions: (questions.data ?? []) as ServiceQuestion[],
+      answers: (answers.data ?? []) as RequestAnswer[],
     };
   }, id);
 
@@ -64,7 +71,11 @@ export default function RequestDetail() {
   }, [id, reload]);
 
   if (!data) return error ? <ErrorText>{error}</ErrorText> : <Loading />;
-  const { req, history, docs, required } = data;
+  const { req, history, docs, required, questions, answers } = data;
+  const answerFor = (qid: string) => answers.find((a) => a.question_id === qid)?.answer ?? "";
+  // answers to questions the service no longer asks
+  const oldAnswers = answers.filter((a) => !a.question_id || !questions.some((q) => q.id === a.question_id));
+  const changed = questions.filter((q) => edits[q.id] !== undefined && edits[q.id].trim() && edits[q.id].trim() !== answerFor(q.id));
   const isFinal = FINAL_STATUSES.includes(req.status);
   const inputs = docs.filter((d) => d.kind === "input");
   const outputs = docs.filter((d) => d.kind === "output");
@@ -96,6 +107,26 @@ export default function RequestDetail() {
     }
     setUploading(false);
     if (!failed) setPicked({});
+    reload();
+  }
+
+  async function saveAnswers() {
+    setSavingAnswers(true);
+    setActionError(null);
+    const { error } = await supabase.from("request_answers").upsert(
+      changed.map((q) => ({
+        request_id: id,
+        question_id: q.id,
+        question_en: q.question_en,
+        question_mr: q.question_mr,
+        answer: edits[q.id].trim(),
+      })),
+      { onConflict: "request_id,question_id" },
+    );
+    setSavingAnswers(false);
+    if (error) return setActionError(errorText(error));
+    setEdits({});
+    notify(t("detailsSaved"));
     reload();
   }
 
@@ -165,6 +196,31 @@ export default function RequestDetail() {
         <Row label={t("paidToOmsun")} value={rupees(req.amount_paid)} />
         <Row label={t("balanceToOmsun")} value={rupees(balance)} strong />
       </Card>
+
+      {questions.length || oldAnswers.length ? (
+        <>
+          <H2>{t("customerDetails")}</H2>
+          <Card>
+            {isFinal
+              ? questions.map((q) => (
+                  <Row key={q.id} label={pick(q.question_mr, q.question_en)} value={answerFor(q.id) || t("notAnswered")} />
+                ))
+              : questions.map((q) => (
+                  <Field
+                    key={q.id}
+                    label={`${pick(q.question_mr, q.question_en)}${q.is_mandatory ? " *" : ` (${t("optional")})`}`}
+                    value={edits[q.id] ?? answerFor(q.id)}
+                    onChangeText={(v) => setEdits((p) => ({ ...p, [q.id]: v }))}
+                    maxLength={2000}
+                  />
+                ))}
+            {oldAnswers.map((a) => (
+              <Row key={a.id} label={pick(a.question_mr, a.question_en)} value={a.answer} />
+            ))}
+            {changed.length ? <Button title={t("saveDetails")} onPress={saveAnswers} loading={savingAnswers} /> : null}
+          </Card>
+        </>
+      ) : null}
 
       <H2>{t("yourDocuments")}</H2>
       {inputs.length === 0 ? <Muted style={{ marginBottom: 12 }}>{t("noDocuments")}</Muted> : null}
