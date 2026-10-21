@@ -7,7 +7,9 @@ insert into profile_fields(key, scope, kind, block, label_en, label_mr, options)
  ('age','member','number',1,'Age','वय','[]'),
  ('family_income','household','band',3,'Family income a year','कुटुंबाचे वार्षिक उत्पन्न',
   '[{"value":"upto_21000","en":"Up to ₹21,000","mr":"₹21,000 पर्यंत","min":0,"max":21000},{"value":"upto_250000","en":"Up to ₹2.5 lakh","mr":"₹2.5 लाखांपर्यंत","min":21001,"max":250000}]'),
- ('it_payer','household','yes_no',3,'Anyone pays income tax','कुटुंबात कोणी आयकर भरतो का','[]');
+ ('it_payer','household','yes_no',3,'Anyone pays income tax','कुटुंबात कोणी आयकर भरतो का','[]')
+on conflict (key) do nothing;  -- later migrations seed these questions
+update profile_fields set label_en = 'Gender' where key = 'gender';
 
 set role authenticated;
 
@@ -125,5 +127,8 @@ select t_err($$select publish_scheme_version('70000000-0000-0000-0000-0000000000
 reset role;
 select t_check((select count(*) >= 3 from audit_logs where table_name = 'scheme_versions'), 'scheme changes are in the audit log');
 delete from scheme_suggestions; delete from screenings; delete from family_members; delete from families;
-update schemes set current_version_id = null; delete from scheme_versions; delete from schemes; delete from profile_fields;
+update schemes set current_version_id = null where id = '71000000-0000-0000-0000-000000000001';
+delete from scheme_versions where scheme_id = '71000000-0000-0000-0000-000000000001';
+delete from schemes where id = '71000000-0000-0000-0000-000000000001';
+update profile_fields set label_en = 'Gender' where key = 'gender';
 select 'YOJANA SCHEME TESTS PASSED';
