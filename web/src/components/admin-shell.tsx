@@ -27,6 +27,7 @@ import {
   Menu,
   MessageCircle,
   Receipt,
+  SearchCheck,
   Settings,
   Sparkles,
   Store,
@@ -66,6 +67,7 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
     title: "Customer",
     items: [
       { href: "/admin/customers", label: "Customer Management", icon: Users },
+      { href: "/admin/yojana", label: "Yojana Check", icon: SearchCheck },
       { href: "/admin/documents", label: "Verified Docs", icon: BadgeCheck, roles: ["owner", "manager", "accountant", "service_executive"] },
     ],
   },
