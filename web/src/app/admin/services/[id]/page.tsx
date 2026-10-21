@@ -2,7 +2,8 @@ import { notFound } from "next/navigation";
 import { requireStaff } from "@/lib/auth";
 import type { Service, ServiceCategory } from "@/lib/types";
 import { ActionForm } from "@/components/action-form";
-import { Card, Field, inputClass, PageTitle } from "@/components/ui";
+import { Card, Field, inputClass, PageTitle, Table } from "@/components/ui";
+import { dateIST, rupees } from "@/lib/format";
 import { addQuestion, addRequiredDocument, removeQuestion, removeRequiredDocument, updateService } from "../actions";
 import { ServiceFields } from "../service-form";
 
@@ -16,6 +17,11 @@ export default async function EditService({ params }: { params: Promise<{ id: st
     supabase.from("service_questions").select("*").eq("service_id", id).order("sort_order"),
   ]);
   if (!service) notFound();
+  // Price history comes from the audit log, which only the owner can read.
+  const { data: history } =
+    profile.role === "owner"
+      ? await supabase.from("service_price_history").select("*").eq("service_id", id).order("changed_at", { ascending: false }).limit(50)
+      : { data: null };
 
   return (
     <>
@@ -95,6 +101,33 @@ export default async function EditService({ params }: { params: Promise<{ id: st
         </Card>
         </div>
       </div>
+      {history && history.length > 0 && (
+        <div className="mt-8">
+          <h2 className="mb-2 font-semibold text-blue-950">Price history</h2>
+          <Table head={["When", "Who", "Govt fee", "Service charge", "Commission", "Cap"]}>
+            {history.map((h, i) => (
+              <tr key={i}>
+                <td className="px-4 py-3">{dateIST(h.changed_at, true)}</td>
+                <td className="px-4 py-3">{h.changed_by_name ?? "—"}</td>
+                <td className="px-4 py-3"><Change before={h.old_govt_fee} after={h.new_govt_fee} /></td>
+                <td className="px-4 py-3"><Change before={h.old_service_charge} after={h.new_service_charge} /></td>
+                <td className="px-4 py-3"><Change before={h.old_commission} after={h.new_commission} /></td>
+                <td className="px-4 py-3"><Change before={h.old_price_cap} after={h.new_price_cap} /></td>
+              </tr>
+            ))}
+          </Table>
+        </div>
+      )}
     </>
+  );
+}
+
+function Change({ before, after }: { before: number | null; after: number | null }) {
+  const show = (v: number | null) => (v === null ? "—" : rupees(v));
+  if (before === after) return <span className="text-gray-500">{show(after)}</span>;
+  return (
+    <span>
+      {before !== null && <span className="text-red-700 line-through">{show(before)}</span>} <span className="font-medium text-green-800">{show(after)}</span>
+    </span>
   );
 }

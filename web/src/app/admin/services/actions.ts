@@ -34,6 +34,8 @@ function serviceFields(f: FormData) {
     service_charge: n(f, "service_charge"),
     retailer_commission: n(f, "retailer_commission"),
     processing_days: s(f, "processing_days") ? n(f, "processing_days") : null,
+    price_cap: s(f, "price_cap") ? n(f, "price_cap") : null,
+    price_cap_note: s(f, "price_cap_note") || null,
     available_to_retailers: f.get("available_to_retailers") === "on",
     is_active: f.get("is_active") === "on",
   };

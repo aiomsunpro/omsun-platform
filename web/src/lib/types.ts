@@ -52,6 +52,8 @@ export type Service = {
   customer_price: number;
   retailer_commission: number;
   processing_days: number | null;
+  price_cap: number | null;
+  price_cap_note: string | null;
   available_to_retailers: boolean;
   is_active: boolean;
 };
