@@ -6,6 +6,8 @@ One platform for OMSUN E-Services, Omerga: the public website, the admin/employe
 
 Stage 1 (business workflow, roles and database) is done. Stage 2, the admin web app, is in `web/`. Stage 3, the OMSUN Mitra retailer app, is in `mobile/`. Next: payments and commissions, notifications, analytics.
 
+In progress: **Yojana eligibility**. Retailers and office staff screen a whole family once and see which government schemes it qualifies for. Managers edit schemes as drafts and the owner approves them. The database part is `supabase/migrations/20261021120000_yojana_schemes.sql`.
+
 ## Layout
 
 | Path | What |
