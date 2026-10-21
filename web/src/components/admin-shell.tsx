@@ -18,6 +18,8 @@ import {
   FileCheck,
   HandCoins,
   KeyRound,
+  Landmark,
+  ListChecks,
   Image as ImageIcon,
   LayoutDashboard,
   LogOut,
@@ -56,6 +58,8 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
       { href: "/admin/requests/new", label: "New Walk-in", icon: CirclePlus, roles: ["owner", "manager", "service_executive"] },
       { href: "/admin/compliances", label: "Compliances", icon: FileCheck, roles: ["owner", "manager", "accountant", "service_executive"] },
       { href: "/admin/services", label: "Service Management", icon: Settings },
+      { href: "/admin/schemes", label: "Yojana Schemes", icon: Landmark },
+      { href: "/admin/profile-questions", label: "Yojana Questions", icon: ListChecks, roles: ["owner", "manager"] },
     ],
   },
   {
