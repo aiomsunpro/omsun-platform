@@ -46,7 +46,20 @@ export function ServiceFields({
           <input name="retailer_commission" type="number" step="0.01" min="0" readOnly={!canPrice} defaultValue={service?.retailer_commission ?? 0} className={inputClass} />
         </Field>
       </div>
-      {!canPrice && <p className="text-xs text-gray-500">Only the owner can change prices and commission.</p>}
+      <div className="grid gap-3 sm:grid-cols-3">
+        <Field label="Government price cap ₹ (if a GR fixes it)">
+          <input name="price_cap" type="number" step="0.01" min="0" readOnly={!canPrice} defaultValue={service?.price_cap ?? ""} className={inputClass} />
+        </Field>
+        <div className="sm:col-span-2">
+          <Field label="Cap source (GR number or rate sheet)">
+            <input name="price_cap_note" readOnly={!canPrice} defaultValue={service?.price_cap_note ?? ""} className={inputClass} />
+          </Field>
+        </div>
+      </div>
+      <p className="text-xs text-gray-500">
+        Every retailer and the office charge this one price. A price above the cap is refused.
+        {!canPrice && " Only the owner can change prices, commission and caps."}
+      </p>
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Description (English)">
           <textarea name="description_en" rows={2} defaultValue={service?.description_en ?? ""} className={inputClass} />
