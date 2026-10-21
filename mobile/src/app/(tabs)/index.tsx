@@ -235,6 +235,29 @@ export default function Home() {
           />
         </View>
 
+        {/* Yojana check: screen a whole family for every scheme */}
+        <Pressable
+          onPress={() => router.push("/yojana")}
+          style={({ pressed }) => ({
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 14,
+            marginTop: 12,
+            backgroundColor: pressed ? colors.blueDark : colors.blue,
+            borderRadius: 24,
+            padding: 16,
+          })}
+        >
+          <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: colors.yellow, alignItems: "center", justifyContent: "center" }}>
+            <Ionicons name="ribbon-outline" size={26} color={colors.text} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: colors.white, fontSize: 17, fontWeight: "800" }}>{t("yojanaCheck")}</Text>
+            <Text style={{ color: colors.blueLight, fontSize: 12, marginTop: 2 }}>{t("yojanaCheckHint")}</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={colors.yellow} />
+        </Pressable>
+
         {/* Recent requests */}
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 24, marginBottom: 10 }}>
           <Text style={{ fontSize: 17, fontWeight: "800", color: colors.text }}>{t("recentRequests")}</Text>

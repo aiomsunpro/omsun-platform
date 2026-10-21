@@ -6,7 +6,7 @@ One platform for OMSUN E-Services, Omerga: the public website, the admin/employe
 
 Stage 1 (business workflow, roles and database) is done. Stage 2, the admin web app, is in `web/`. Stage 3, the OMSUN Mitra retailer app, is in `mobile/`. Next: payments and commissions, notifications, analytics.
 
-In progress: **Yojana eligibility**. Retailers and office staff screen a whole family once and see which government schemes it qualifies for. Managers edit schemes as drafts and the owner approves them. The database part is `supabase/migrations/20261021120000_yojana_schemes.sql`.
+**Yojana eligibility** (Oct 2026): retailers (OMSUN Mitra → योजना तपासणी) and office staff (`/admin/yojana`) screen a whole family once and see every scheme it qualifies for: Eligible, Check one more thing, or Not eligible, with the next questions to ask. Apply turns a scheme into a normal service request at the head-office price. Managers edit schemes and profile questions in `/admin/schemes` and `/admin/profile-questions`; only the owner approves a scheme change, and every version is kept. The rules engine is the database function `screen_family` (`supabase/migrations/2026102113*_yojana_engine.sql`). The seeded Maharashtra schemes are drafts until checked against their GR and approved.
 
 ## Layout
 

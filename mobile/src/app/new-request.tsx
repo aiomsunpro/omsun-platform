@@ -31,9 +31,11 @@ export default function NewRequest() {
     };
   }, []);
   const { t, pick } = useI18n();
-  const params = useLocalSearchParams<{ service?: string }>();
-  const [step, setStep] = useState(0);
-  const [customer, setCustomer] = useState<Customer | null>(null);
+  // From a Yojana check: customer, service, scheme and family member come ready.
+  const params = useLocalSearchParams<{ service?: string; customer?: string; scheme?: string; member?: string }>();
+  const fromScheme = !!(params.customer && params.service);
+  const [step, setStep] = useState(fromScheme ? 2 : 0);
+  const [picked, setCustomer] = useState<Customer | null>(null);
   const [serviceId, setServiceId] = useState<string | null>(params.service ?? null);
   const [files, setFiles] = useState<Record<string, PickedFile[]>>({});
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -52,6 +54,8 @@ export default function NewRequest() {
       .limit(1000);
     return must(res) as Customer[];
   });
+
+  const customer = picked ?? (params.customer ? (customers.data?.find((c) => c.id === params.customer) ?? null) : null);
 
   const service = catalogue.data?.services.find((s) => s.id === serviceId) ?? null;
   const requiredDocs = useMemo(
@@ -100,7 +104,12 @@ export default function NewRequest() {
     setProgress(t("submitting"));
     const { data, error } = await supabase
       .from("service_requests")
-      .insert({ customer_id: customer.id, service_id: service.id, remarks: remarks.trim() || null })
+      .insert({
+        customer_id: customer.id,
+        service_id: service.id,
+        remarks: remarks.trim() || null,
+        ...(fromScheme && params.scheme && service.id === params.service ? { scheme_id: params.scheme, family_member_id: params.member ?? null } : {}),
+      })
       .select("id, request_number")
       .single();
     if (error || !data) {
