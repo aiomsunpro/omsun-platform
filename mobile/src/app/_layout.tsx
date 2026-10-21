@@ -27,6 +27,9 @@ function RootStack() {
       <Stack.Screen name="services" options={{ title: t("servicesAndPrices") }} />
       <Stack.Screen name="customers" options={{ title: t("myCustomers") }} />
       <Stack.Screen name="notifications" options={{ title: t("notifications") }} />
+      <Stack.Screen name="yojana/index" options={{ title: t("yojanaCheck") }} />
+      <Stack.Screen name="yojana/answers" options={{ title: t("answerQuestions") }} />
+      <Stack.Screen name="yojana/[id]" options={{ title: t("yojanaCheck") }} />
     </Stack>
   );
 }
