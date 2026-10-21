@@ -285,3 +285,57 @@ export function schemeChanges(before: SchemeData | null, after: SchemeData, fiel
   }
   return out;
 }
+
+export type Family = {
+  id: string;
+  retailer_id: string | null;
+  family_name: string;
+  mobile: string | null;
+  village: string | null;
+  taluka: string | null;
+  district: string | null;
+  answers: Answers;
+  consent_method: "otp" | "verbal" | null;
+  consent_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type FamilyMember = {
+  id: string;
+  family_id: string;
+  customer_id: string | null;
+  full_name: string;
+  relation: string;
+  answers: Answers;
+  sort_order: number;
+};
+
+export type Answers = Record<string, unknown>;
+
+export const DONT_KNOW = "dont_know";
+
+export const RELATIONS: [string, string, string][] = [
+  ["self", "Self", "स्वतः"],
+  ["spouse", "Husband / wife", "पती / पत्नी"],
+  ["son", "Son", "मुलगा"],
+  ["daughter", "Daughter", "मुलगी"],
+  ["father", "Father", "वडील"],
+  ["mother", "Mother", "आई"],
+  ["other", "Other", "इतर"],
+];
+
+export type ScreenResult = "eligible" | "check" | "not_eligible";
+
+/** One answer in plain words, for summaries. */
+export function answerText(field: ProfileField | undefined, value: unknown) {
+  if (value === undefined || value === null || value === "") return "—";
+  if (value === DONT_KNOW) return "Don't know";
+  if (field?.kind === "yes_no") return value ? "Yes" : "No";
+  if (Array.isArray(value)) return value.length ? value.map((v) => optionLabel(field, v)).join(", ") : "None";
+  if (field?.kind === "choice" || field?.kind === "band") return optionLabel(field, value);
+  return String(value);
+}
+
+export const labelsOf = (keys: string[], fields: Map<string, ProfileField>) =>
+  keys.map((k) => fields.get(k)?.label_en ?? k).join(", ");
